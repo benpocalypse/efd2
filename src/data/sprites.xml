@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<gfx-xform version="1">
+    <input file="..\data\tileset.png" type="png" tile-width="8" tile-height="8" />
+    <output file="..\data\tileset.inc">
+        <tiles var-name="roguetiles"/>
+        <maps pointers-size="8">
+        <map var-name="hero" left="0" top="0" width="1" height="1"/>
+        <map var-name="wall" left="0" top="1" width="1" height="1"/>
+        <map var-name="floor" left="1" top="1" width="1" height="1"/>
+        <map var-name="door" left="3" top="1" width="1" height="1"/>
+	</maps>	
+    </output>
+</gfx-xform>
