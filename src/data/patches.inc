@@ -67,7 +67,7 @@ const char patch03[] PROGMEM ={
 };
 
 
-//FX: drop floor noise
+//FX: drop noise
 const char patch04[] PROGMEM ={	
 0,PC_NOISE_PARAMS,10,
 0,PC_ENV_SPEED,-30, 
