@@ -41,401 +41,472 @@ the visibility & height of the overlay.
 
 
 //external data
-#include "data/smb.map.inc"
-#include "data/smb.pic.inc"
 #include "data/fonts_8x8.pic.inc"
-
-#include "data/mario_sprites.map.inc"
-#include "data/mario_sprites.pic.inc"
-
-#include "data/nsmb.inc"
+#include "data/tileset.inc"
 #include "data/patches.inc"
 
-unsigned char sx=0,sy=0, anim=0,frame=0,action=0,stopFrame,sprDir,jmpPos,g,i, active=1,mode=0;
-char dx=1,dy=0;
-bool stopping=false;
-unsigned int walkFrame,lastWalkDir;
-double jumpVal;
 
-#define ACTION_IDLE 0
-#define ACTION_WALK 1
-#define ACTION_STOPPING 2
-#define ACTION_JUMP 3
+#define MAPWIDTH	28U
+#define MAPHEIGHT	30U
+#define MODWIDTH	 3U
+
+#define UP		0U
+#define DOWN	1U
+#define LEFT	2U
+#define RIGHT	3U
+
+#define EMPTY	0U
+#define WALL	1U
+#define DOOR	2U
+#define FLOOR	3U
+
+
+struct MapObject
+{
+	unsigned char ucX;
+	unsigned char ucY;
+	unsigned char ucType;
+};
+
+// 240 x 224 (30 x 28)
+unsigned char	objMap[MODWIDTH][MAPHEIGHT];
+struct MapObject		objEntrance;
+struct MapObject		objExit;
+
+void InitializeMap(void);
+void GenerateMap(unsigned char ucRoomType);
+void DrawMyMap(void);
+unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
+void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
+void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType);
+unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY);
+void FloodFill(unsigned char x, unsigned char y, unsigned char ucType);
+
 
 unsigned char processControls(void);
 
-unsigned char mario[2][6];
-void PerformActions();
-
-extern const char waves[];
 extern void SetColorBurstOffset(unsigned char value);
-
-unsigned char goombaX[2];
-char goombaDir[2];
-unsigned char goombaAnim[4];
-unsigned char goombaSpr[2];
-unsigned char goombaSprIndex[2];
-unsigned char delay=0;
-
-
 
 int main(){	
 	TriggerFx(0,0,0);
-
-
+	
 	ClearVram();
 	InitMusicPlayer(patches);
 	SetMasterVolume(0x40);
-	StartSong(song_nsmb);
+	//StartSong(song_nsmb);
 
-	SetSpritesTileTable(mario_sprites_tileset);
-	SetFontTilesIndex(SMB_TILESET_SIZE);
+	//SetSpritesTileTable(mario_sprites_tileset);
+		SetTileTable(roguetiles);
+	SetFontTilesIndex(ROGUETILES_SIZE);
 	//SetColorBurstOffset(4);
-	SetTileTable(smb_tileset);
+
 	
 
 	//DrawMap2(0,0,map_main);
-	DrawMap2(0,VRAM_TILES_V,map_hud);
-	
-	unsigned char c;
-	for(int y=0;y<23;y++){
-		for(int x=0;x<30;x++){
-			c=pgm_read_byte(&(map_main[(y*MAP_MAIN_WIDTH)+x+2]));
-			SetTile(x,y+1,c);
-		}	
-	}
+	//DrawMap2(0,VRAM_TILES_V,map_hud);
+			
 
 
-	dx=0;
-	sx=50;
-	sy=169-32+8;
-	sprDir=1;
-
-	goombaX[0]=17; //159;
-	goombaDir[0]=-1;
-	goombaAnim[0]=0;
-	goombaSpr[0]=0;
-	goombaSprIndex[0]=6;
-
-	goombaX[1]=65 ;//201;
-	goombaDir[1]=1;
-	goombaAnim[1]=0;
-	goombaSpr[1]=0;
-	goombaSprIndex[1]=10;
-
-
-	MapSprite2(0,map_rwalk1,0);
-	MapSprite2(6,map_rgoomba1,SPRITE_FLIP_X);
-	MapSprite2(10,map_rgoomba2,0);
-
-
-
-	g=0;
-	MoveSprite(0,sx,sy,2,3);
-	Scroll(0,-1);
-
-	MoveSprite(goombaSprIndex[0],goombaX[0],176,2,2);
-	MoveSprite(goombaSprIndex[1],goombaX[1],176,2,2);
-
-	Screen.scrollY=0;
-	Screen.overlayHeight=OVERLAY_LINES;
+    //SetTile(5,5,1);
+    
+    InitializeMap();
+	GenerateMap(0U);
+	FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
+	DrawMyMap();
 
 	
-	while(1){
+	while(1)
+	{
 		WaitVsync(1);
-	
-
-		processControls();
-
-		if((active&1)!=0){
-			PerformActions();
-			MoveSprite(0,sx,sy+dy,2,3);
-		}else{
-			MoveSprite(0,sx,230,2,3);
+		if(processControls() == 1)
+		{
+		    InitializeMap();
+	        GenerateMap(0U);
+	        FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
+	        DrawMyMap();
 		}
-
-
-
-		//animate goombas
-		for(g=0;g<2;g++){
-		
-
-				if(goombaX[g]<=0 && goombaDir[g]==-1){
-					goombaDir[g]=1;
-				}
-		
-				if(goombaX[g] >= (215+15) && goombaDir[g]==1){
-					goombaDir[g]=-1;
-			
-				}
-		
-				goombaX[g]+=goombaDir[g];
-				goombaAnim[g]++;
-
-				if(goombaAnim[g]==8){
-					goombaSpr[g]^=1;
-					goombaAnim[g]=0;
-				}
-
-				if(goombaSpr[g]==0){
-					MapSprite2(goombaSprIndex[g],map_rgoomba1,goombaDir[g]!=1?SPRITE_FLIP_X:0);
-				}else{
-					MapSprite2(goombaSprIndex[g],map_rgoomba2,goombaDir[g]!=1?SPRITE_FLIP_X:0);
-				}
-
-				MoveSprite(goombaSprIndex[g],goombaX[g],176-32+8,2,2);
-			
-
-		}
-	
-
 	}		
 	
 }
 
-void loadNextStripe(){
-	static unsigned int srcX=30;
-	static unsigned char destX=30;
-
-	for(int y=0;y<23;y++){
-		SetTile(destX,y+1,pgm_read_byte(&(map_main[(y*MAP_MAIN_WIDTH)+srcX+2])));		
-	}
-
-	srcX++;
-	if(srcX>=MAP_MAIN_WIDTH)srcX=0;
-
-	destX++;
-	if(destX>=32)destX=0;
-}
-
-void PerformActions(){
-	char sdx,sprFlags=(sprDir!=1?SPRITE_FLIP_X:0);
-
-	if(stopping==true && walkFrame<=5){
-		MapSprite2(0,map_rwalk1,sprFlags);
-		dy=0;
-		stopFrame++;
-		return;
-	}
-
-	sdx=dx;
-	if(dx==1 && sx>=110) sdx=0;
-	//if(dx==-1 && sx<=10) sdx=0;
-	//if(dx==1 && sx>=220) sdx=0;
-
-	switch(action){
-		case ACTION_WALK:
-			
-			if(frame==0){
-				MapSprite2(0,map_rwalk2,sprFlags);
-				dy=-1;				
-			}else if(frame>0 && frame<=5){
-				sx+=sdx;
-			}else if(frame==6){
-				sx+=(sdx*2);
-			}else if(frame==7){
-				MapSprite2(0,map_rwalk1,sprFlags);
-				dy=0;
-				sx+=(sdx*2);
-
-			if(stopping){
-				stopFrame++;
-			}
-
-			}else if(frame>7 && frame<=11){
-				sx+=sdx;
-			}else if(frame==12){
-				MapSprite2(0,map_rwalk2,sprFlags);
-				dy=-1;	
-				sx+=(sdx*2);
-			}else if(frame>12 && frame<=15){
-				sx+=sdx;
-			}else if(frame==16){
-				sx+=sdx;
-				frame=7;
-				break;	
-			}else if(frame==17){
-				dy=0;
-				MapSprite2(0,map_lskid,sprFlags);
-				sx+=sdx;
-			}else if(frame==18){
-				sx+=sdx;
-			}else if(frame==19){
-				frame=7;
-				sx+=sdx;
-			}
-
-
-
-			frame++;
-			walkFrame++;
-
-			break;
-
-		case ACTION_JUMP:
-			
-		
-			dy=-( pgm_read_byte(&(waves[jmpPos])) /2  );
-
-
-			if(frame==0){
-				MapSprite2(0,map_rjump1,sprFlags);
-
-				sx+=sdx;
-
-
-
-			}else if(frame>0 && frame<=20){
-			
-				sx+=sdx;
-
-
-
-			}else if(frame==21){
-				MapSprite2(0,map_rjump2,sprFlags);
-				sx+=sdx;
-
-			}else if(frame>21 && frame<=42){
-				
-				sx+=sdx;
-			}else if(frame==43){
-			
-				sx+=sdx;
-				dy=0;
-				MapSprite2(0,map_rwalk1,sprFlags);
-				action=ACTION_IDLE;
-				
-			}
-			
-			jmpPos+=3;
-			frame++;
-
-			break;
-	};
-}
-
 unsigned char processControls(void){
-	static unsigned char ov=4,scroll=0;
-	static int lastbuttons=0;
 	unsigned int joy=ReadJoypad(0);
 
 
 	if(joy&BTN_A){
-		if(action!=ACTION_JUMP){
-			action=ACTION_JUMP;
-			frame=0;
-			jmpPos=0;
-		}
 	
 	}else if(joy&BTN_X){
-		Scroll(0,1);	
-	//	while(ReadJoypad(0)!=0);
+
 	}else if(joy&BTN_Y){
-		Scroll(0,-1);
-	//	while(ReadJoypad(0)!=0);
+
 	}else if(joy&BTN_SR){
-	//	Scroll(1,0);
-	//	while(ReadJoypad(0)!=0);
+
 	}else if(joy&BTN_SL){
-	//	Scroll(-1,0);
-	//	while(ReadJoypad(0)!=0);
+
 	}else if(joy&BTN_UP){
-		//if(sy==0)sy=(VRAM_TILES_V*8);
-		//sy--;
-		//while(ReadJoypad(0)!=0);
+
 
 	}else if(joy&BTN_DOWN){
-		//sy++;
-		//if(sy>=(VRAM_TILES_V*8))sy=0;
-	//	while(ReadJoypad(0)!=0);
+
 	
 	}
 	
 	if(joy&BTN_LEFT){
 		
-		//while(ReadJoypad(0)!=0);
-		
-		if(action==ACTION_IDLE){
-			action=ACTION_WALK;
-			dx=-1;
-			frame=0;
-			stopping=false;
-			walkFrame=0;
-			lastWalkDir=BTN_LEFT;
-			sprDir=-1;
-		}
-		
 		
 	}else if(joy&BTN_RIGHT){
-
-		//while(ReadJoypad(0)!=0);
-
-		
-		if(action==ACTION_IDLE){
-			action=ACTION_WALK;
-			dx=1;
-			frame=0;
-			stopping=false;
-			walkFrame=0;
-			lastWalkDir=BTN_RIGHT;
-			sprDir=1;
-		}
-		
-		if(sx>=110){
-
-			if(joy&BTN_B){
-				Scroll(2,0);
-				scroll+=2;
-			}else{
-				Scroll(1,0);
-				scroll++;
-			}
-			
-			if(scroll>=8){
-				loadNextStripe();
-				scroll=0;
-			}
-		}
-
 	
 	}
 
 	if(joy&BTN_START){
-		ov++;
-		if(ov>OVERLAY_LINES)ov=0;
-
-		Screen.overlayHeight=ov;
-		while(ReadJoypad(0)!=0);
+        return 1;
 	}
 
 	if(joy&BTN_SELECT){
-		StopSong();
-		while((ReadJoypad(0)&BTN_SELECT)!=0);
+
 	}
-
-
-	
-
-
-	if(stopping==true && stopFrame==1){
-		action=ACTION_IDLE;
-		stopping=false;
-		dx=0;
-	}else if(lastWalkDir!= (joy & (BTN_LEFT+BTN_RIGHT)) && action==ACTION_WALK){
-		
-		if((joy & (BTN_LEFT+BTN_RIGHT))!=0 ){
-			frame=17;
-		}else{
-			stopping=true;
-			stopFrame=0;
-		}
-	}
-	
-
-	lastbuttons=joy;
-	lastWalkDir= joy & (BTN_LEFT+BTN_RIGHT);
-
-
 	return 0;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// Initializes our map structure to its defaults.
+///////////////////////////////////////////////////////////////////////////////
+void InitializeMap(void)
+{
+	for(unsigned char i = 0U; i < MAPWIDTH;i++)
+	{
+		for(unsigned char j = 0U; j < MAPHEIGHT;j++)
+		{
+			objMap[i/MODWIDTH][j] = EMPTY;
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// This function takes care of actually generating the 'maze' and fills the
+/// appropriate datastructures.
+///////////////////////////////////////////////////////////////////////////////
+void GenerateMap(unsigned char ucRoomType)
+{	
+	/// Room Type 1
+	/// 1. Draw 4 walls of random length on each of the 4 edges of the screen.
+	/// 2. Pick a random spot on one of the 4 walls to start from.
+	/// 3. Pick an exit on one of the 3 other walls.
+	/// 4. Draw diagonal walls to connect the 4 walls that are already drawn.
+	/// 5. Sprinkle monsters and items.
+	
+	unsigned char ucStart = 0U;
+	unsigned char ucRandom1 = 0U;
+	unsigned char ucRandom2 = 0U;
+	unsigned char ucEntrance = 0U;
+	unsigned char ucExit = 0U;
+
+	objEntrance.ucX = 0U;
+	objEntrance.ucY = 0U;
+
+	objEntrance.ucType = DOOR;
+	objExit.ucType = DOOR;
+
+	ucEntrance = RandomNum(0,4);
+
+	switch(ucEntrance)
+	{
+		case UP:
+			ucExit = RandomNum(1,4);
+			break;
+		case DOWN:
+			if(RandomNum(0,2))
+				ucExit = RandomNum(2,4);
+			else
+				ucExit = 0;
+			break;
+		case LEFT:
+			ucExit = RandomNum(0,4);
+			if(ucExit == 2)
+				ucExit = 3;
+			break;
+		case RIGHT:
+			ucExit = RandomNum(0,3);
+			break;
+	}
+
+	/// Save our starting point.
+	ucStart = RandomNum(0U, (MAPWIDTH - 1U)/2);
+	ucRandom1 = RandomNum(MAPWIDTH/2, MAPWIDTH - 1U);
+	/// Top Wall
+	DrawLine(ucStart, 0U, ucRandom1, 0U, WALL); 
+	if(ucEntrance == UP)
+	{
+		//Console::Write("UP\n");
+		objEntrance.ucX = RandomNum(ucStart+1, ucRandom1-1);
+		objEntrance.ucY = 0U;
+	}	
+
+	if(ucExit == UP)
+	{
+		objExit.ucX = RandomNum(ucStart+1, ucRandom1-1);
+		objExit.ucY = 0U;
+	}
+	/// Top Right Diagonal
+	ucRandom2 = RandomNum(0U, (MAPHEIGHT - 1U)/2);
+	DrawLine(ucRandom1, 0U, MAPWIDTH - 1U, ucRandom2, WALL);	
+	/// Right Wall
+	ucRandom1 = RandomNum(MAPHEIGHT/2, MAPHEIGHT - 1U);
+	DrawLine(MAPWIDTH - 1U, ucRandom2, MAPWIDTH - 1U, ucRandom1, WALL);
+	if(ucEntrance == RIGHT)
+	{
+		//Console::Write("RIGHT\n");
+		objEntrance.ucX = MAPWIDTH - 1U;
+		objEntrance.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
+	}
+	
+	if(ucExit == RIGHT)
+	{
+		objExit.ucX = MAPWIDTH - 1U;
+		objExit.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
+	}
+	/// Bottom Right Diagonal
+	ucRandom2 = RandomNum((MAPWIDTH - 1U)/2, MAPWIDTH - 1U);
+	DrawLine(ucRandom2, MAPHEIGHT - 1U, MAPWIDTH - 1U, ucRandom1, WALL);	
+	/// Bottom Wall
+	ucRandom1 = RandomNum(0U, (MAPWIDTH - 1U)/2);
+	DrawLine(ucRandom1, MAPHEIGHT - 1U, ucRandom2, MAPHEIGHT - 1U, WALL);
+	if(ucEntrance == DOWN)
+	{
+		//Console::Write("DOWN\n");
+		objEntrance.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
+		objEntrance.ucY = MAPHEIGHT - 1U;
+	}
+	
+	if(ucExit == DOWN)
+	{
+		objExit.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
+		objExit.ucY = MAPHEIGHT - 1U;
+	}
+	/// Bottom Left Diagonal
+	ucRandom2 = RandomNum((MAPHEIGHT - 1U)/2, MAPHEIGHT - 1U);
+	DrawLine(ucRandom1, MAPHEIGHT - 1U, 0U, ucRandom2, WALL);	
+	/// Left Wall
+	ucRandom1 = RandomNum(0U, MAPHEIGHT/2);
+	DrawLine(0U, ucRandom2, 0U, ucRandom1, WALL);
+	if(ucEntrance == LEFT)
+	{
+		//Console::Write("LEFT\n");
+		objEntrance.ucX = 0U;
+		objEntrance.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
+	}
+	
+	if(ucExit == LEFT)
+	{
+		objExit.ucX = 0U;
+		objExit.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
+	}
+	/// Top Left Diagonal
+	DrawLine(0U, ucRandom1, ucStart, 0U, WALL);
+
+	//Console::Write("x: ");
+	//Console::Write(objEntrance.ucX);
+	//Console::Write(" y: ");
+	//Console::Write(objEntrance.ucY);
+	//Console::Write("\n");
+
+	Draw(objEntrance.ucX, objEntrance.ucY, objEntrance.ucType);
+	Draw(objExit.ucX, objExit.ucY, objExit.ucType);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Draws the current map structure.
+///////////////////////////////////////////////////////////////////////////////
+void DrawMyMap(void)
+{
+	for(unsigned char i = 0U; i < MAPHEIGHT; i++)
+	{
+		for(unsigned char j = 0U; j < MAPWIDTH; j++)
+		{
+			if(IsA(WALL, j, i))
+				//Console::Write("W");
+				SetTile(i,j,1);
+			
+			if(IsA(DOOR, j, i))
+				//Console::Write("D");
+				SetTile(i,j,3);
+
+			if(IsA(FLOOR, j, i))
+				//Console::Write(".");
+				SetTile(i,j,2);
+			
+			if(IsA(EMPTY, j, i))
+				//Console::Write(" ");
+				SetTile(i,j,0);
+		}
+		
+		//Console::Write("\n");
+	}	
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Generates random numbers starting at and including ucMin up to and 
+/// including ucMax, and returns the number.
+///////////////////////////////////////////////////////////////////////////////
+unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax)
+{
+	return (unsigned char)(ucMin + rand() % (ucMax - ucMin));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Implements Bresenham's line drawing algorithm to efficiently draw lines
+/// from one point to another in any direction.
+///////////////////////////////////////////////////////////////////////////////
+void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile) 
+{
+	signed char distance;
+    signed char xerr = 0;
+	signed char yerr = 0;
+	signed char delta_x;
+	signed char delta_y;
+    signed char incx, incy;
+
+    /// Compute an x and y delta.
+    delta_x = ucEndX - ucStartX;
+    delta_y = ucEndY - ucStartY;
+
+    // Compute the direction of the incrementation in the x direction
+    // An increment of 0 means either a horizontal or vertical line.
+    if(delta_x > 0)
+	{
+		incx = 1;
+	}
+    else 
+	{
+		if(delta_x==0) 
+		{
+			incx = 0;
+		}
+		else 
+		{
+			incx = -1;
+		}
+	}    
+
+	// Compute the direction of the incrementation in the y direction
+    // An increment of 0 means either a horizontal or vertical line.
+    if(delta_y > 0)
+	{
+		incy = 1;
+	}
+    else 
+	{
+		if(delta_y == 0)
+		{
+			incy = 0;
+		} 
+		else
+		{
+			incy = -1;
+		}
+	}
+
+    /// Determine which direction is the greater incrementation.
+    delta_x = abs(delta_x);
+    delta_y = abs(delta_y);
+
+    if(delta_x > delta_y) 
+	{
+		distance = delta_x;
+	}
+    else
+	{
+		distance = delta_y;
+	}
+
+    /// Now, finally draw our line.
+    for(signed char t = 0; t <= (distance + 1); t++) 
+	{
+		Draw(ucStartX, ucStartY, cTile);
+		//objMap[ucStartX/4][ucStartY] |= WALL << ((ucStartX%4)*2);
+        
+        xerr += delta_x;
+        yerr += delta_y;
+
+        if(xerr > distance)
+		{
+            xerr -= distance;
+            ucStartX += incx;
+        }
+        if(yerr > distance)
+		{
+            yerr -= distance;
+            ucStartY += incy;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Sets the passed tile to the passed in Type.
+///////////////////////////////////////////////////////////////////////////////
+void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType)
+{
+	unsigned char ucTemp = ~(3U << ((ucX%MODWIDTH)*2));
+	ucTemp &= objMap[ucX/MODWIDTH][ucY];
+	ucTemp |= ucType << ((ucX%MODWIDTH)*2);
+	objMap[ucX/MODWIDTH][ucY] = ucTemp;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Returns whether or not the specified block is of the specified type.
+///////////////////////////////////////////////////////////////////////////////
+unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY)
+{
+	return ((objMap[ucX/MODWIDTH][ucY] & (3 << ((ucX%MODWIDTH)*2))) == (ucType << ((ucX%MODWIDTH)*2)));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Fills the specified x,y empty space with the destination tile.
+///////////////////////////////////////////////////////////////////////////////
+void FloodFill(unsigned char x, unsigned char y, 
+				unsigned char ucType)
+ {
+   unsigned char ucLeft;
+   unsigned char ucRight;
+   unsigned char ucInLine = 1;
+ 
+   /// Search to the left, filling along the way.
+   ucLeft = ucRight = x;
+
+   while(ucInLine == 1)
+   {
+		Draw(ucLeft, y, ucType);
+		ucLeft--;
+		ucInLine = (ucLeft < 0) ? 0 : (IsA(EMPTY, ucLeft, y));
+   }
+
+   ucLeft++;
+
+   /// Search to the right, filling along the way.
+   ucInLine = 1;
+
+   while(ucInLine == 1)
+   {
+     Draw(ucRight, y, ucType);     
+     ucRight++;
+     ucInLine = (ucRight > MAPWIDTH-1) ? 0 : (IsA(EMPTY, ucRight, y));
+   }
+
+   ucRight--;
+
+   /// Fill the top and bottom.
+   for(unsigned char i = ucLeft; i <= ucRight; i++)
+   {
+     if( y > 0 && (IsA(EMPTY, i, y-1)))
+	 {
+         FloodFill(i, y - 1, ucType);
+	 }
+
+     if( y < MAPHEIGHT-1 && (IsA(EMPTY, i, y+1)))
+	 {
+         FloodFill(i, y + 1, ucType);
+	 }
+   }
+ }
 
