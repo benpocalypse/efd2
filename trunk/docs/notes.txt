@@ -1,0 +1,148 @@
+<globals.h>
+-----------------------------------------------------
+#define FALSE 0U
+#define TRUE  1U
+
+typedef struct
+{
+    unsigned char ucBigX;
+    unsigned char ucBigY;
+    unsigned char ucSmallX;
+    unsigned char ucSmallY;
+} COORDINATE;
+
+
+<player.h>
+-----------------------------------------------------
+#define HEALTH_POTION     0x0001
+#define HASTE_POTION      0x0002
+#define INVINCIBLE_POTION 0x0004
+#define STRENGTH_POTION   0x0008
+#define LONGSWORD         0x0010
+#define LIGHTSWORD        0x0020
+#define CLOTH_ARMOR       0x0040
+#define LEATHER_ARMOR     0x0080
+
+
+typdef struct
+{
+    unsigned char ucHitPoints;
+    unsigned char ucGold;
+    unsigned int  uiInventory; // BITFIELD...MASKABLE, ORABLE(16 items total)
+    unsigned char ucScreensPassed;
+    COORDINATE    objLocation;
+} PLAYER;
+
+
+unsigned char PlayerHasA(PLAYER objPlayer, unsigned int uiItem)
+{
+    if((objPlayer.uiInventory & uiItem) && uiItem) == TRUE)
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+
+<enemy.h>
+-----------------------------------------------------
+typedef struct
+{
+    unsigned char ucType;
+    unsigned char ucHitPoints;
+    COORDINATE    objLocation;
+} ENEMY;
+
+
+<map.h>
+-----------------------------------------------------
+#define MAPWIDTH     30U
+#define MAPHEIGHT    28U
+#define MODWIDTH      3U
+
+#define UP      0U
+#define DOWN    1U
+#define LEFT    2U
+#define RIGHT   3U
+
+#define EMPTY   0U
+#define WALL    1U
+#define DOOR    2U
+#define FLOOR   3U
+
+typedef struct
+{
+	unsigned char ucX;
+	unsigned char ucY;
+	unsigned char ucType;
+} MAPBLOCK;
+
+// 240 x 224 (30 x 28)
+unsigned char objMap[MODWIDTH][MAPHEIGHT];
+MAPBLOCK      objEntrance;
+MAPBLOCK      objExit;
+
+
+//*****************************************************************************
+// Initializes our map structure to containing all EMPTY blocks.
+//*****************************************************************************
+void InitializeGMap(void)
+{
+    for(unsigned char i = 0U; i < MAPWIDTH;i++)
+    {
+        for(unsigned char j = 0U; j < MAPHEIGHT;j++)
+        {
+            objMap[i/MODWIDTH][j] = EMPTY;
+        }
+    }
+}
+
+
+<collision.h>
+-----------------------------------------------------
+//*****************************************************************************
+// Detect a collision between two object's COORDINATES, using an efficient
+// circular collision detection.
+//*****************************************************************************
+unsigned char CircleCollision(COORDINATE objCircle1, unsigned char ucRad1, COORDINATE objCircle1, unsigned char ucRad1)
+{
+    // FIXME - this doesn't account for negative numbers
+    unsigned char ucDx = objCircle1.ucBigX - objCircle2.ucBigX;
+    unsigned char ucDy = objCircle1.ucBigY - objCircle2.ucBigY;
+
+    unsigned char radii = radius1 + radius2;
+
+    if(((ucDx*ucDx) + (ucDy*ucDy)) < (ucRad1*ucRad2))
+    {
+        return TRUE
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+
+//*****************************************************************************
+// Detect a collision between an object's COORDINATES and a MAPBLOCK, using
+// an efficient circular collision detection.
+//*****************************************************************************
+unsigned char MapCollision(COORDINATE objObject, MAP objMap)
+{
+    unsigned char ucDx = objObject.ucBigX - objCircle2.ucBigX;
+    unsigned char ucDy = objCircle1.ucBigY - objCircle2.ucBigY;
+
+    unsigned char radii = radius1 + radius2;
+
+    if(((ucDx*ucDx) + (ucDy*ucDy)) < (ucRad1*ucRad2))
+    {
+        return TRUE
+    }
+    else
+    {
+        return FALSE;
+    }
+}
