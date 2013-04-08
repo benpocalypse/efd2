@@ -1,3 +1,6 @@
+Oryx-Lofi tiles license:
+http://creativecommons.org/licenses/by-nc/3.0/us/
+
 <globals.h>
 -----------------------------------------------------
 #define FALSE 0U

@@ -7,7 +7,7 @@
       <Entity type="Class">
         <Name>GameManager</Name>
         <Access>Public</Access>
-        <Location left="457" top="26" />
+        <Location left="527" top="26" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -15,7 +15,7 @@
       <Entity type="Class">
         <Name>InputManager</Name>
         <Access>Public</Access>
-        <Location left="52" top="78" />
+        <Location left="35" top="74" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -23,7 +23,7 @@
       <Entity type="Class">
         <Name>Player</Name>
         <Access>Public</Access>
-        <Location left="176" top="193" />
+        <Location left="139" top="193" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -31,7 +31,7 @@
       <Entity type="Class">
         <Name>Inventory</Name>
         <Access>Public</Access>
-        <Location left="176" top="333" />
+        <Location left="139" top="333" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -39,7 +39,7 @@
       <Entity type="Class">
         <Name>Enemy</Name>
         <Access>Public</Access>
-        <Location left="369" top="193" />
+        <Location left="332" top="193" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -47,7 +47,7 @@
       <Entity type="Class">
         <Name>Map</Name>
         <Access>Public</Access>
-        <Location left="564" top="193" />
+        <Location left="527" top="193" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -55,7 +55,7 @@
       <Entity type="Class">
         <Name>Object</Name>
         <Access>Public</Access>
-        <Location left="462" top="333" />
+        <Location left="425" top="333" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -63,7 +63,7 @@
       <Entity type="Class">
         <Name>Generator</Name>
         <Access>Public</Access>
-        <Location left="689" top="333" />
+        <Location left="652" top="333" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -71,7 +71,7 @@
       <Entity type="Class">
         <Name>LogicManager</Name>
         <Access>Public</Access>
-        <Location left="910" top="71" />
+        <Location left="925" top="193" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -79,7 +79,15 @@
       <Entity type="Class">
         <Name>CutsceneManager</Name>
         <Access>Public</Access>
-        <Location left="778" top="193" />
+        <Location left="741" top="193" />
+        <Size width="162" height="77" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>AnimationManager</Name>
+        <Access>Public</Access>
+        <Location left="978" top="26" />
         <Size width="162" height="77" />
         <Collapsed>False</Collapsed>
         <Modifier>None</Modifier>
@@ -87,66 +95,116 @@
     </Entities>
     <Relationships>
       <Relationship type="Association" first="2" second="3">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
       </Relationship>
       <Relationship type="Association" first="4" second="6">
-        <StartOrientation>Vertical</StartOrientation>
-        <EndOrientation>Vertical</EndOrientation>
-        <Direction>Unidirectional</Direction>
-        <AssociationType>Composition</AssociationType>
-      </Relationship>
-      <Relationship type="Association" first="5" second="6">
         <Label>
         </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>412</X>
+          <Y>295</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>480</X>
+          <Y>308</Y>
+        </BendPoint>
+        <Direction>Unidirectional</Direction>
+        <AssociationType>Composition</AssociationType>
+      </Relationship>
+      <Relationship type="Association" first="5" second="6">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>589</X>
+          <Y>295</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>542</X>
+          <Y>308</Y>
+        </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Aggregation</AssociationType>
         <StartMultiplicity>1</StartMultiplicity>
         <EndMultiplicity>0..*</EndMultiplicity>
       </Relationship>
       <Relationship type="Dependency" first="5" second="7">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>649</X>
+          <Y>299</Y>
+        </BendPoint>
       </Relationship>
       <Relationship type="Dependency" first="0" second="8">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
-        <EndOrientation>Horizontal</EndOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+        <BendPoint relativeToStartShape="True">
+          <X>724</X>
+          <Y>93</Y>
+        </BendPoint>
+        <BendPoint relativeToStartShape="False">
+          <X>942</X>
+          <Y>161</Y>
+        </BendPoint>
       </Relationship>
       <Relationship type="Dependency" first="0" second="1">
+        <Label>
+        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Association" first="0" second="2">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
       </Relationship>
       <Relationship type="Association" first="0" second="4">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
       </Relationship>
       <Relationship type="Association" first="0" second="5">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
       </Relationship>
       <Relationship type="Association" first="0" second="9">
+        <Label>
+        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
         <BendPoint relativeToStartShape="False">
-          <X>859</X>
+          <X>822</X>
           <Y>168</Y>
         </BendPoint>
         <Direction>Unidirectional</Direction>
         <AssociationType>Composition</AssociationType>
+      </Relationship>
+      <Relationship type="Dependency" first="0" second="10">
+        <Label>
+        </Label>
+        <StartOrientation>Horizontal</StartOrientation>
+        <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
     </Relationships>
   </ProjectItem>
