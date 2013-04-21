@@ -2,11 +2,28 @@
 <gfx-xform version="1">
     <input file="tileset.png" type="png" tile-width="8" tile-height="8" />
     <output file="tileset.inc">
-        <tiles var-name="efd2"/>
+        <tiles var-name="efd2_tiles"/>
         <maps pointers-size="8">
-        <map var-name="wall" left="1" top="0" width="1" height="1"/>
-        <map var-name="floor" left="5" top="0" width="1" height="1"/>
+        <map var-name="floor1" left="1" top="0" width="1" height="1"/>
+        <map var-name="floor2" left="2" top="0" width="1" height="1"/>
+        <map var-name="floor3" left="3" top="0" width="1" height="1"/>
+        
         <map var-name="door" left="4" top="0" width="1" height="1"/>
+        
+        <map var-name="stairs_down" left="5" top="0" width="1" height="1"/>
+        <map var-name="table" left="6" top="0" width="1" height="1"/>
+        <map var-name="shelf" left="7" top="0" width="1" height="1"/>
+        <map var-name="barrel" left="0" top="1" width="1" height="1"/>
+        
+        <map var-name="wall_up" left="1" top="1" width="1" height="1"/>
+        <map var-name="wall_down" left="2" top="1" width="1" height="1"/>
+        <map var-name="wall_left" left="3" top="1" width="1" height="1"/>
+        <map var-name="wall_top" left="4" top="1" width="1" height="1"/>
+        <map var-name="wall_middle" left="5" top="1" width="1" height="1"/>
+        <map var-name="wall_right" left="6" top="1" width="1" height="1"/>
+        <map var-name="wall_single" left="7" top="1" width="1" height="1"/>
+        
+        <map var-name="creative_commons" left="3" top="7" width="5" height="1"/>
 	</maps>	
     </output>
 </gfx-xform>
