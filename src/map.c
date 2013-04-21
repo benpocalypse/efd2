@@ -1,9 +1,9 @@
 #include "map.h"
 
 // Map size defines.
-#define MAPWIDTH	28U
-#define MAPHEIGHT	30U
-#define MODWIDTH	 3U
+#define MAPWIDTH	15U
+#define MAPHEIGHT	15U
+#define MODWIDTH	 4U
 
 // Defines that tell us which side of the map our entrance/exit is on.
 #define UP		0U
@@ -12,10 +12,22 @@
 #define RIGHT	3U
 
 // Defines for our tile types.
-#define EMPTY	0U
-#define WALL	1U
-#define DOOR	2U
-#define FLOOR	3U
+#define EMPTY	    0U
+#define FLOOR1      1U
+#define FLOOR2      2U
+#define FLOOR3      3U
+#define DOOR	    4U
+#define STAIRS      5U
+#define TABLE       6U
+#define SHELF       7U
+#define BARREL      8U
+#define WALL_UP     9U
+#define WALL_DOWN   10U
+#define WALL_LEFT   11U
+#define WALL_TOP    12U
+#define WALL_MIDDLE 13U
+#define WALL_RIGHT  14U
+#define WALL_SINGLE 15U
 
 
 // Object type that holds an item that will appear somewhere on the map.
@@ -38,7 +50,9 @@ struct MapObject	objExit;
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
 static void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType);
 static unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY);
+static unsigned char TileIs(unsigned char ucX, unsigned char ucY);
 static void FloodFill(unsigned char x, unsigned char y, unsigned char ucType);
+static unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
 
 
 ///****************************************************************************
@@ -61,131 +75,167 @@ void InitializeMap(void)
 /// with the appropriate tiles.
 ///****************************************************************************
 void GenerateMap(unsigned char ucRoomType)
-{	
-	/// Room Type 1
-	/// 1. Draw 4 walls of random length on each of the 4 edges of the screen.
-	/// 2. Pick a random spot on one of the 4 walls to start from.
-	/// 3. Pick an exit on one of the 3 other walls.
-	/// 4. Draw diagonal walls to connect the 4 walls that are already drawn.
-	/// 5. Sprinkle monsters and items.
+{
+    if(ucRoomType == 0U)
+    {
+        unsigned char ucEntrace = 0U;
+        unsigned char ucExit = 0U;
+        unsigned char ucWidth = 0U;
+        unsigned char ucHeight = 0U;
+        
+        ucWidth = RandomNum(10, MAPWIDTH);
+        ucHeight = RandomNum(10, MAPHEIGHT);
+        
+        Draw(10, 10, FLOOR1);
+        Draw(11, 11, FLOOR2);
+        Draw(12, 12, FLOOR3);
+        Draw(13, 13, WALL_MIDDLE);
+        Draw(14, 14, WALL_TOP);
+        
+        // Draw the top of our room
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_MIDDLE);
+        
+        // Draw the left wall
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
+        
+        // Draw the right wall
+        //DrawLine((MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
+        
+        // Draw the bottom wall
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), WALL_MIDDLE);
+        
+        // Finally, fill the floor with 1 of our 3 floor tile types.
+        //FloodFill(MAPWIDTH/2,MAPHEIGHT/2, RandomNum(1,3));
+    }
+    
+    if(ucRoomType == 1U)
+    {/*
+	    /// Room Type 1
+	    /// 1. Draw 4 walls of random length on each of the 4 edges of the screen.
+	    /// 2. Pick a random spot on one of the 4 walls to start from.
+	    /// 3. Pick an exit on one of the 3 other walls.
+	    /// 4. Draw diagonal walls to connect the 4 walls that are already drawn.
+	    /// 5. Sprinkle monsters and items.
 	
-	unsigned char ucStart = 0U;
-	unsigned char ucRandom1 = 0U;
-	unsigned char ucRandom2 = 0U;
-	unsigned char ucEntrance = 0U;
-	unsigned char ucExit = 0U;
+	    unsigned char ucStart = 0U;
+	    unsigned char ucRandom1 = 0U;
+	    unsigned char ucRandom2 = 0U;
+	    unsigned char ucEntrance = 0U;
+	    unsigned char ucExit = 0U;
 
-	objEntrance.ucX = 0U;
-	objEntrance.ucY = 0U;
+	    objEntrance.ucX = 0U;
+	    objEntrance.ucY = 0U;
 
-	objEntrance.ucType = DOOR;
-	objExit.ucType = DOOR;
+	    objEntrance.ucType = DOOR;
+	    objExit.ucType = DOOR;
 
-	ucEntrance = RandomNum(0,4);
+	    ucEntrance = RandomNum(0,4);
 
-	switch(ucEntrance)
-	{
-		case UP:
-			ucExit = RandomNum(1,4);
-			break;
-		case DOWN:
-			if(RandomNum(0,2))
-				ucExit = RandomNum(2,4);
-			else
-				ucExit = 0;
-			break;
-		case LEFT:
-			ucExit = RandomNum(0,4);
-			if(ucExit == 2)
-				ucExit = 3;
-			break;
-		case RIGHT:
-			ucExit = RandomNum(0,3);
-			break;
-	}
+	    switch(ucEntrance)
+	    {
+		    case UP:
+			    ucExit = RandomNum(1,4);
+			    break;
+		    case DOWN:
+			    if(RandomNum(0,2))
+				    ucExit = RandomNum(2,4);
+			    else
+				    ucExit = 0;
+			    break;
+		    case LEFT:
+			    ucExit = RandomNum(0,4);
+			    if(ucExit == 2)
+				    ucExit = 3;
+			    break;
+		    case RIGHT:
+			    ucExit = RandomNum(0,3);
+			    break;
+	    }
 
-	/// Save our starting point.
-	ucStart = RandomNum(0U, (MAPWIDTH - 1U)/2);
-	ucRandom1 = RandomNum(MAPWIDTH/2, MAPWIDTH - 1U);
-	/// Top Wall
-	DrawLine(ucStart, 0U, ucRandom1, 0U, WALL); 
-	if(ucEntrance == UP)
-	{
-		//Console::Write("UP\n");
-		objEntrance.ucX = RandomNum(ucStart+1, ucRandom1-1);
-		objEntrance.ucY = 0U;
-	}	
+	    /// Save our starting point.
+	    ucStart = RandomNum(0U, (MAPWIDTH - 1U)/2);
+	    ucRandom1 = RandomNum(MAPWIDTH/2, MAPWIDTH - 1U);
+	    /// Top Wall
+	    DrawLine(ucStart, 0U, ucRandom1, 0U, WALL); 
+	    if(ucEntrance == UP)
+	    {
+		    //Console::Write("UP\n");
+		    objEntrance.ucX = RandomNum(ucStart+1, ucRandom1-1);
+		    objEntrance.ucY = 0U;
+	    }	
 
-	if(ucExit == UP)
-	{
-		objExit.ucX = RandomNum(ucStart+1, ucRandom1-1);
-		objExit.ucY = 0U;
-	}
-	/// Top Right Diagonal
-	ucRandom2 = RandomNum(0U, (MAPHEIGHT - 1U)/2);
-	DrawLine(ucRandom1, 0U, MAPWIDTH - 1U, ucRandom2, WALL);	
-	/// Right Wall
-	ucRandom1 = RandomNum(MAPHEIGHT/2, MAPHEIGHT - 1U);
-	DrawLine(MAPWIDTH - 1U, ucRandom2, MAPWIDTH - 1U, ucRandom1, WALL);
-	if(ucEntrance == RIGHT)
-	{
-		//Console::Write("RIGHT\n");
-		objEntrance.ucX = MAPWIDTH - 1U;
-		objEntrance.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
-	}
+	    if(ucExit == UP)
+	    {
+		    objExit.ucX = RandomNum(ucStart+1, ucRandom1-1);
+		    objExit.ucY = 0U;
+	    }
+	    /// Top Right Diagonal
+	    ucRandom2 = RandomNum(0U, (MAPHEIGHT - 1U)/2);
+	    DrawLine(ucRandom1, 0U, MAPWIDTH - 1U, ucRandom2, WALL);	
+	    /// Right Wall
+	    ucRandom1 = RandomNum(MAPHEIGHT/2, MAPHEIGHT - 1U);
+	    DrawLine(MAPWIDTH - 1U, ucRandom2, MAPWIDTH - 1U, ucRandom1, WALL);
+	    if(ucEntrance == RIGHT)
+	    {
+		    //Console::Write("RIGHT\n");
+		    objEntrance.ucX = MAPWIDTH - 1U;
+		    objEntrance.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
+	    }
 	
-	if(ucExit == RIGHT)
-	{
-		objExit.ucX = MAPWIDTH - 1U;
-		objExit.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
-	}
-	/// Bottom Right Diagonal
-	ucRandom2 = RandomNum((MAPWIDTH - 1U)/2, MAPWIDTH - 1U);
-	DrawLine(ucRandom2, MAPHEIGHT - 1U, MAPWIDTH - 1U, ucRandom1, WALL);	
-	/// Bottom Wall
-	ucRandom1 = RandomNum(0U, (MAPWIDTH - 1U)/2);
-	DrawLine(ucRandom1, MAPHEIGHT - 1U, ucRandom2, MAPHEIGHT - 1U, WALL);
-	if(ucEntrance == DOWN)
-	{
-		//Console::Write("DOWN\n");
-		objEntrance.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
-		objEntrance.ucY = MAPHEIGHT - 1U;
-	}
+	    if(ucExit == RIGHT)
+	    {
+		    objExit.ucX = MAPWIDTH - 1U;
+		    objExit.ucY = RandomNum(ucRandom2+1, ucRandom1-1);
+	    }
+	    /// Bottom Right Diagonal
+	    ucRandom2 = RandomNum((MAPWIDTH - 1U)/2, MAPWIDTH - 1U);
+	    DrawLine(ucRandom2, MAPHEIGHT - 1U, MAPWIDTH - 1U, ucRandom1, WALL);	
+	    /// Bottom Wall
+	    ucRandom1 = RandomNum(0U, (MAPWIDTH - 1U)/2);
+	    DrawLine(ucRandom1, MAPHEIGHT - 1U, ucRandom2, MAPHEIGHT - 1U, WALL);
+	    if(ucEntrance == DOWN)
+	    {
+		    //Console::Write("DOWN\n");
+		    objEntrance.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
+		    objEntrance.ucY = MAPHEIGHT - 1U;
+	    }
 	
-	if(ucExit == DOWN)
-	{
-		objExit.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
-		objExit.ucY = MAPHEIGHT - 1U;
-	}
-	/// Bottom Left Diagonal
-	ucRandom2 = RandomNum((MAPHEIGHT - 1U)/2, MAPHEIGHT - 1U);
-	DrawLine(ucRandom1, MAPHEIGHT - 1U, 0U, ucRandom2, WALL);	
-	/// Left Wall
-	ucRandom1 = RandomNum(0U, MAPHEIGHT/2);
-	DrawLine(0U, ucRandom2, 0U, ucRandom1, WALL);
-	if(ucEntrance == LEFT)
-	{
-		//Console::Write("LEFT\n");
-		objEntrance.ucX = 0U;
-		objEntrance.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
-	}
+	    if(ucExit == DOWN)
+	    {
+		    objExit.ucX = RandomNum(ucRandom1+1, ucRandom2-1);
+		    objExit.ucY = MAPHEIGHT - 1U;
+	    }
+	    /// Bottom Left Diagonal
+	    ucRandom2 = RandomNum((MAPHEIGHT - 1U)/2, MAPHEIGHT - 1U);
+	    DrawLine(ucRandom1, MAPHEIGHT - 1U, 0U, ucRandom2, WALL);	
+	    /// Left Wall
+	    ucRandom1 = RandomNum(0U, MAPHEIGHT/2);
+	    DrawLine(0U, ucRandom2, 0U, ucRandom1, WALL);
+	    if(ucEntrance == LEFT)
+	    {
+		    //Console::Write("LEFT\n");
+		    objEntrance.ucX = 0U;
+		    objEntrance.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
+	    }
 	
-	if(ucExit == LEFT)
-	{
-		objExit.ucX = 0U;
-		objExit.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
-	}
-	/// Top Left Diagonal
-	DrawLine(0U, ucRandom1, ucStart, 0U, WALL);
+	    if(ucExit == LEFT)
+	    {
+		    objExit.ucX = 0U;
+		    objExit.ucY = RandomNum(ucRandom1+1, ucRandom2-1);
+	    }
+	    /// Top Left Diagonal
+	    DrawLine(0U, ucRandom1, ucStart, 0U, WALL);
 
-	//Console::Write("x: ");
-	//Console::Write(objEntrance.ucX);
-	//Console::Write(" y: ");
-	//Console::Write(objEntrance.ucY);
-	//Console::Write("\n");
+	    //Console::Write("x: ");
+	    //Console::Write(objEntrance.ucX);
+	    //Console::Write(" y: ");
+	    //Console::Write(objEntrance.ucY);
+	    //Console::Write("\n");
 
-	Draw(objEntrance.ucX, objEntrance.ucY, objEntrance.ucType);
-	Draw(objExit.ucX, objExit.ucY, objExit.ucType);
+	    Draw(objEntrance.ucX, objEntrance.ucY, objEntrance.ucType);
+	    Draw(objExit.ucX, objExit.ucY, objExit.ucType);
+	    */
+    }
 }
 
 
@@ -198,24 +248,8 @@ void DrawMyMap(void)
 	{
 		for(unsigned char j = 0U; j < MAPWIDTH; j++)
 		{
-			if(IsA(WALL, j, i))
-				//Console::Write("W");
-				SetTile(i,j,1);
-			
-			if(IsA(DOOR, j, i))
-				//Console::Write("D");
-				SetTile(i,j,3);
-
-			if(IsA(FLOOR, j, i))
-				//Console::Write(".");
-				SetTile(i,j,2);
-			
-			if(IsA(EMPTY, j, i))
-				//Console::Write(" ");
-				SetTile(i,j,0);
+		    SetTile(i, j, TileIs(i, j));
 		}
-		
-		//Console::Write("\n");
 	}	
 }
 
@@ -342,6 +376,15 @@ unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY)
 
 
 ///****************************************************************************
+/// Returns whether or not the specified block is of the specified type.
+///****************************************************************************
+unsigned char TileIs(unsigned char ucX, unsigned char ucY)
+{
+    return (objMap[ucX/MODWIDTH][ucY] & (3 << ((ucX%MODWIDTH)*2)));
+}
+
+
+///****************************************************************************
 /// Fills the specified x,y empty space with the destination tile.
 ///****************************************************************************
 void FloodFill(unsigned char x, unsigned char y, 
@@ -389,3 +432,4 @@ void FloodFill(unsigned char x, unsigned char y,
 	 }
    }
  }
+

@@ -26,42 +26,32 @@
 #include <avr/interrupt.h>
 #include <uzebox.h>
 
+#include "map.h"
+
 
 //external data
-#include "data/fonts_8x8.pic.inc"
+//#include "data/fonts_8x8.pic.inc"
 #include "data/tileset.inc"
-#include "data/patches.inc"
+//#include "data/patches.inc"
 
 
 unsigned char processControls(void);
 
-extern void SetColorBurstOffset(unsigned char value);
-
-int main(){	
-	TriggerFx(0,0,0);
-	
-	ClearVram();
-	InitMusicPlayer(patches);
-	SetMasterVolume(0x40);
+int main(){
+	//TriggerFx(0,0,0);
+	//InitMusicPlayer(patches);
+	//SetMasterVolume(0x40);
 	//StartSong(song_nsmb);
 
 	//SetSpritesTileTable(mario_sprites_tileset);
-		SetTileTable(roguetiles);
-	SetFontTilesIndex(ROGUETILES_SIZE);
-	//SetColorBurstOffset(4);
-
 	
-
-	//DrawMap2(0,0,map_main);
-	//DrawMap2(0,VRAM_TILES_V,map_hud);
-			
-
-
-    //SetTile(5,5,1);
+	ClearVram();
+	SetTileTable(efd2_tiles);
+	SetFontTilesIndex(EFD2_TILES_SIZE);
     
     InitializeMap();
 	GenerateMap(0U);
-	FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
+//	FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
 	DrawMyMap();
 
 	
@@ -71,8 +61,8 @@ int main(){
 		if(processControls() == 1)
 		{
 		    InitializeMap();
+   	        DrawMyMap();
 	        GenerateMap(0U);
-	        FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
 	        DrawMyMap();
 		}
 	}		
