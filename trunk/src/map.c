@@ -1,9 +1,11 @@
 #include "map.h"
 
 // Map size defines.
-#define MAPWIDTH	15U
-#define MAPHEIGHT	15U
-#define MODWIDTH	 4U
+#define MAPWIDTH	20U // The actual width of the map
+#define MAPHEIGHT	20U // The actual height of the map
+#define MODWIDTH	2U  // The number of tiles to be stored in a single unsigned char
+#define MODSHIFT    4U  // The number of bits to shift when compressing our tiles
+#define MODBITS     15U // The bits for an OR/AND mask in half of an unsigned char
 
 // Defines that tell us which side of the map our entrance/exit is on.
 #define UP		0U
@@ -40,7 +42,7 @@ struct MapObject
 
 
 // 240 x 224 (30 x 28)
-unsigned char	    objMap[MODWIDTH][MAPHEIGHT];
+unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
 struct MapObject    objEntrance;
 struct MapObject	objExit;
 
@@ -58,15 +60,15 @@ static unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
 ///****************************************************************************
 /// Initializes our map structure to contain all empty tiles initially.
 ///****************************************************************************
-void InitializeMap(void)
+void MAP_InitializeMap(void)
 {
-	for(unsigned char i = 0U; i < MAPWIDTH;i++)
-	{
-		for(unsigned char j = 0U; j < MAPHEIGHT;j++)
-		{
-			objMap[i/MODWIDTH][j] = EMPTY;
-		}
-	}
+    for(unsigned char i = 0U; i < (MAPWIDTH/MODWIDTH);i++)
+    {
+        for(unsigned char j = 0U; j < MAPHEIGHT;j++)
+        {
+            objMap[i][j] = EMPTY;
+        }
+    }
 }
 
 
@@ -74,7 +76,7 @@ void InitializeMap(void)
 /// This function takes care of actually generating the 'maze' and fills it
 /// with the appropriate tiles.
 ///****************************************************************************
-void GenerateMap(unsigned char ucRoomType)
+void MAP_GenerateMap(unsigned char ucRoomType)
 {
     if(ucRoomType == 0U)
     {
@@ -82,30 +84,21 @@ void GenerateMap(unsigned char ucRoomType)
         unsigned char ucExit = 0U;
         unsigned char ucWidth = 0U;
         unsigned char ucHeight = 0U;
-        
+
         ucWidth = RandomNum(10, MAPWIDTH);
         ucHeight = RandomNum(10, MAPHEIGHT);
-        
-        Draw(10, 10, FLOOR1);
-        Draw(11, 11, FLOOR2);
-        Draw(12, 12, FLOOR3);
-        Draw(13, 13, WALL_MIDDLE);
-        Draw(14, 14, WALL_TOP);
-        
-        // Draw the top of our room
-        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_MIDDLE);
-        
+
         // Draw the left wall
-        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
-        
+        DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
         // Draw the right wall
-        //DrawLine((MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
-        
+        DrawLine((MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
+        // Draw the top of our room
+        DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_MIDDLE);
         // Draw the bottom wall
-        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), WALL_MIDDLE);
-        
+        DrawLine((MAPWIDTH/2) - (ucWidth/2) + 1, (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2) - 1, (MAPHEIGHT/2) - (ucHeight/2), WALL_MIDDLE);
+
         // Finally, fill the floor with 1 of our 3 floor tile types.
-        //FloodFill(MAPWIDTH/2,MAPHEIGHT/2, RandomNum(1,3));
+        FloodFill(MAPWIDTH/2,MAPHEIGHT/2, RandomNum(1,3));
     }
     
     if(ucRoomType == 1U)
@@ -242,11 +235,11 @@ void GenerateMap(unsigned char ucRoomType)
 ///****************************************************************************
 /// Draws the current map structure.
 ///****************************************************************************
-void DrawMyMap(void)
+void MAP_DrawMyMap(void)
 {
-	for(unsigned char i = 0U; i < MAPHEIGHT; i++)
+	for(unsigned char j = 0U; j < MAPHEIGHT; j++)
 	{
-		for(unsigned char j = 0U; j < MAPWIDTH; j++)
+		for(unsigned char i = 0U; i < MAPWIDTH; i++)
 		{
 		    SetTile(i, j, TileIs(i, j));
 		}
@@ -260,7 +253,7 @@ void DrawMyMap(void)
 ///****************************************************************************
 unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax)
 {
-	return (unsigned char)(ucMin + rand() % (ucMax - ucMin));
+	return (unsigned char)(ucMin + rand() % ((ucMax - ucMin)+1));
 }
 
 
@@ -359,10 +352,10 @@ void DrawLine(unsigned char ucStartX, unsigned char ucStartY,
 ///****************************************************************************
 void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType)
 {
-	unsigned char ucTemp = ~(3U << ((ucX%MODWIDTH)*2));
-	ucTemp &= objMap[ucX/MODWIDTH][ucY];
-	ucTemp |= ucType << ((ucX%MODWIDTH)*2);
-	objMap[ucX/MODWIDTH][ucY] = ucTemp;
+    unsigned char ucTemp = ~(MODBITS << ((ucX%MODWIDTH)*MODSHIFT));
+    ucTemp &= objMap[ucX/MODWIDTH][ucY];
+    ucTemp |= ucType << ((ucX%MODWIDTH)*MODSHIFT);
+    objMap[ucX/MODWIDTH][ucY] = ucTemp;
 }
 
 
@@ -371,7 +364,7 @@ void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType)
 ///****************************************************************************
 unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY)
 {
-	return ((objMap[ucX/MODWIDTH][ucY] & (3 << ((ucX%MODWIDTH)*2))) == (ucType << ((ucX%MODWIDTH)*2)));
+    return ((objMap[ucX/MODWIDTH][ucY] & (MODBITS << ((ucX%MODWIDTH)*MODSHIFT))) == (ucType << ((ucX%MODWIDTH)*MODSHIFT)));
 }
 
 
@@ -380,7 +373,7 @@ unsigned char IsA(unsigned char ucType, unsigned char ucX, unsigned char ucY)
 ///****************************************************************************
 unsigned char TileIs(unsigned char ucX, unsigned char ucY)
 {
-    return (objMap[ucX/MODWIDTH][ucY] & (3 << ((ucX%MODWIDTH)*2)));
+    return (objMap[ucX/MODWIDTH][ucY] & (MODBITS << ((ucX%MODWIDTH)*MODSHIFT))) >> ((ucX%MODWIDTH)*MODSHIFT);
 }
 
 

@@ -27,6 +27,7 @@
 #include <uzebox.h>
 
 #include "map.h"
+#include "input.h"
 
 
 //external data
@@ -45,65 +46,30 @@ int main(){
 
 	//SetSpritesTileTable(mario_sprites_tileset);
 	
+	unsigned char ucTime = 0;
+	
 	ClearVram();
 	SetTileTable(efd2_tiles);
 	SetFontTilesIndex(EFD2_TILES_SIZE);
     
-    InitializeMap();
-	GenerateMap(0U);
-//	FloodFill(MAPWIDTH/2,MAPHEIGHT/2, FLOOR);
-	DrawMyMap();
+    MAP_InitializeMap();
+	MAP_GenerateMap(0U);
+	MAP_DrawMyMap();
 
 	
 	while(1)
 	{
+	    ucTime++;
 		WaitVsync(1);
-		if(processControls() == 1)
+		if(INPUT_GetButton() == START)
 		{
-		    InitializeMap();
-   	        DrawMyMap();
-	        GenerateMap(0U);
-	        DrawMyMap();
+    		srand((unsigned)ucTime);
+		    MAP_InitializeMap();
+   	        MAP_DrawMyMap();
+	        MAP_GenerateMap(0U);
+	        MAP_DrawMyMap();
 		}
 	}		
 	
 }
 
-unsigned char processControls(void){
-	unsigned int joy=ReadJoypad(0);
-
-
-	if(joy&BTN_A){
-	
-	}else if(joy&BTN_X){
-
-	}else if(joy&BTN_Y){
-
-	}else if(joy&BTN_SR){
-
-	}else if(joy&BTN_SL){
-
-	}else if(joy&BTN_UP){
-
-
-	}else if(joy&BTN_DOWN){
-
-	
-	}
-	
-	if(joy&BTN_LEFT){
-		
-		
-	}else if(joy&BTN_RIGHT){
-	
-	}
-
-	if(joy&BTN_START){
-        return 1;
-	}
-
-	if(joy&BTN_SELECT){
-
-	}
-	return 0;
-}
