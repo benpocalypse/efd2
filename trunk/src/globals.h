@@ -17,7 +17,35 @@
 #define GOLD              0x0100
 #define KEY               0x0200
 
+// Defines for our tile types.
+#define EMPTY	    0U
+#define FLOOR1      1U
+#define FLOOR2      2U
+#define FLOOR3      3U
+#define DOOR	    4U
+#define STAIRS      5U
+#define TABLE       6U
+#define SHELF       7U
+#define BARREL      8U
+#define WALL_UP     9U
+#define WALL_DOWN   10U
+#define WALL_LEFT   11U
+#define WALL_TOP    12U
+#define WALL_MIDDLE 13U
+#define WALL_RIGHT  14U
+#define WALL_SINGLE 15U
 
+#define HUD_CORNER  40
+#define HUD_HORIZ   41
+#define HUD_VERT    42
+
+
+// Video related defines
+#define SCREEN_W    30U
+#define SCREEN_H    28U
+#define HUD_H       6U
+
+/*
 typedef struct
 {
     unsigned char ucBigX;
@@ -26,16 +54,6 @@ typedef struct
     unsigned char ucSmallY;
 } COORDINATE;
 
-
-///////////////////////////////////////////////////////////////////////////////
-/// Generates random numbers starting at and including ucMin up to and 
-/// including ucMax, and returns the number.
-///////////////////////////////////////////////////////////////////////////////
-unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax)
-{
-	return (unsigned char)(ucMin + rand() % (ucMax - ucMin));
-}
-unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
 
 
 unsigned char IsCarrying(unsigned int uiInv, unsigned int uiItem)
@@ -48,6 +66,6 @@ unsigned char IsCarrying(unsigned int uiInv, unsigned int uiItem)
     {
         return FALSE;
     }
-}
+}*/
 
 #endif

@@ -1,8 +1,9 @@
 #include "map.h"
+#include "globals.h"
 
 // Map size defines.
-#define MAPWIDTH	20U // The actual width of the map
-#define MAPHEIGHT	20U // The actual height of the map
+#define MAPWIDTH	24U // The actual width of the map
+#define MAPHEIGHT	18U // The actual height of the map
 #define MODWIDTH	2U  // The number of tiles to be stored in a single unsigned char
 #define MODSHIFT    4U  // The number of bits to shift when compressing our tiles
 #define MODBITS     15U // The bits for an OR/AND mask in half of an unsigned char
@@ -12,24 +13,6 @@
 #define DOWN	1U
 #define LEFT	2U
 #define RIGHT	3U
-
-// Defines for our tile types.
-#define EMPTY	    0U
-#define FLOOR1      1U
-#define FLOOR2      2U
-#define FLOOR3      3U
-#define DOOR	    4U
-#define STAIRS      5U
-#define TABLE       6U
-#define SHELF       7U
-#define BARREL      8U
-#define WALL_UP     9U
-#define WALL_DOWN   10U
-#define WALL_LEFT   11U
-#define WALL_TOP    12U
-#define WALL_MIDDLE 13U
-#define WALL_RIGHT  14U
-#define WALL_SINGLE 15U
 
 
 // Object type that holds an item that will appear somewhere on the map.
@@ -78,37 +61,119 @@ void MAP_InitializeMap(void)
 ///****************************************************************************
 void MAP_GenerateMap(unsigned char ucRoomType)
 {
+    // 2 randomly placed rooms connected by tunnels.
     if(ucRoomType == 0U)
     {
-        unsigned char ucEntrace = 0U;
-        unsigned char ucExit = 0U;
         unsigned char ucWidth = 0U;
+        unsigned char ucWidth2 = 0U;
         unsigned char ucHeight = 0U;
+        unsigned char ucHeight2 = 0U;
+        
+        unsigned char ucRoomOnePosition = RandomNum(0,1);
+        unsigned char ucRoomTwoPosition = RandomNum(0,1);
+        unsigned char ucFloorType = RandomNum(1,3);
 
-        ucWidth = RandomNum(10, MAPWIDTH);
-        ucHeight = RandomNum(10, MAPHEIGHT);
+        // First, decide the room width/height.
+        ucWidth = RandomNum(9, 14);
+        ucHeight = RandomNum(10, 15);
+        
+        // Draw room 1 first.
+        // Draw the left, right, top, and then bottom walls.
+        DrawLine(0, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)),
+                 0, ucHeight + (ucRoomOnePosition*(MAPHEIGHT-ucHeight-1)), WALL_TOP);
+        DrawLine(ucWidth, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)),
+                 ucWidth, ucHeight + (ucRoomOnePosition*(MAPHEIGHT-ucHeight-1)), WALL_TOP);
+        DrawLine(1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)), 
+                 ucWidth - 1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)), WALL_MIDDLE);
+        DrawLine(0, ucHeight + (ucRoomOnePosition*(MAPHEIGHT-ucHeight-1)),
+                 ucWidth, ucHeight + (ucRoomOnePosition*(MAPHEIGHT-ucHeight-1)), WALL_MIDDLE);
 
-        // Draw the left wall
-        DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
-        // Draw the right wall
-        DrawLine((MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
-        // Draw the top of our room
-        DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_MIDDLE);
-        // Draw the bottom wall
-        DrawLine((MAPWIDTH/2) - (ucWidth/2) + 1, (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2) - 1, (MAPHEIGHT/2) - (ucHeight/2), WALL_MIDDLE);
+        // Finally, fill the floor of room 1 with 1 of our 3 floor tile types.
+        FloodFill(ucWidth/2,(ucRoomOnePosition*(MAPHEIGHT-(ucHeight/2)))+1, ucFloorType);
 
-        // Finally, fill the floor with 1 of our 3 floor tile types.
-        FloodFill(MAPWIDTH/2,MAPHEIGHT/2, RandomNum(1,3));
+
+        // Now draw room 2.     
+        // First, decide the room width/height.
+        ucWidth2 = RandomNum(6, 21-ucWidth);
+        ucHeight2 = RandomNum(9, 16);
+
+        // Draw the left, right, top, and then bottom walls.
+        DrawLine(MAPWIDTH-ucWidth2, (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2)),
+                 MAPWIDTH-ucWidth2, ucHeight2 + (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2-1)), WALL_TOP);
+        DrawLine(MAPWIDTH-1, (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2)),
+                 MAPWIDTH-1, ucHeight2 + (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2-1)), WALL_TOP);
+        DrawLine(MAPWIDTH-ucWidth2+1, (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2)), 
+                 MAPWIDTH-2, (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2)), WALL_MIDDLE);
+        DrawLine(MAPWIDTH-ucWidth2, ucHeight2 + (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2-1)),
+                 MAPWIDTH-1, ucHeight2 + (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2-1)), WALL_MIDDLE);
+
+        // Finally, fill the floor of room 2 with 1 of our 3 floor tile types.
+        FloodFill(MAPWIDTH-(ucWidth2/2),(ucRoomTwoPosition*(MAPHEIGHT-(ucHeight2/2)))+1, ucFloorType);
+
+
+        // Now lets connect the two rooms with a hallway...
+
+        // If both rooms are on the same level..
+        if(ucRoomOnePosition == ucRoomTwoPosition)
+        {//...then lets just run a straight hallway between them.
+            // Draw the top.
+            DrawLine(ucWidth, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) - 1,
+                     MAPWIDTH-ucWidth2, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) - 1, WALL_MIDDLE);
+                     
+            // Draw the floor.
+            DrawLine(ucWidth, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2),
+                     MAPWIDTH-ucWidth2, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2), ucFloorType);
+            
+            // Now draw the bottom.
+            DrawLine(ucWidth+1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) + 1,
+                     MAPWIDTH-ucWidth2-1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) + 1, WALL_MIDDLE);
+        }
+        else
+        {//...we need to make a connecting hallway with a bend.
+            // If room 1 is on the top...
+            if(ucRoomOnePosition == 0)
+            {// Then draw a right elbow.
+                DrawLine((ucWidth/2)-1, ucHeight, (ucWidth/2)-1, MAPHEIGHT-2, WALL_TOP);
+                DrawLine((ucWidth/2)-1, MAPHEIGHT-1, MAPWIDTH-ucWidth2, MAPHEIGHT-1, WALL_MIDDLE);
+                
+                DrawLine((ucWidth/2), ucHeight, (ucWidth/2)+1, MAPHEIGHT-2, ucFloorType);
+                DrawLine((ucWidth/2), MAPHEIGHT-2, MAPWIDTH-ucWidth2, MAPHEIGHT-2, ucFloorType);
+                
+                DrawLine((ucWidth/2)+1, ucHeight, (ucWidth/2)+1, MAPHEIGHT-3, WALL_TOP);
+                DrawLine((ucWidth/2)+1, MAPHEIGHT-3, MAPWIDTH-ucWidth2, MAPHEIGHT-3, WALL_MIDDLE);
+            }
+            else
+            {//...finally, room 2 must be on top.
+                DrawLine((ucWidth/2)-1, MAPHEIGHT-ucHeight-1, (ucWidth/2)-1, 0, WALL_TOP);
+                DrawLine((ucWidth/2), 0, MAPWIDTH-ucWidth2, 0, WALL_MIDDLE);
+                
+                DrawLine((ucWidth/2), MAPHEIGHT-ucHeight, (ucWidth/2), 1, ucFloorType);
+                DrawLine((ucWidth/2), 1, MAPWIDTH-ucWidth2, 1, ucFloorType);                                
+                
+                DrawLine((ucWidth/2)+1, MAPHEIGHT-ucHeight-1, (ucWidth/2)+1, 2, WALL_TOP);
+                DrawLine((ucWidth/2)+2, 2, MAPWIDTH-ucWidth2-1, 2, WALL_MIDDLE);
+            }
+        }
+
+        return;
+    }
+
+    // One big room, with multiple obstacles.
+    if(ucRoomType == 1U)
+    {
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
+        //DrawLine((MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_TOP);
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2), (MAPHEIGHT/2) + (ucHeight/2), WALL_MIDDLE);
+        //DrawLine((MAPWIDTH/2) - (ucWidth/2) + 1, (MAPHEIGHT/2) - (ucHeight/2), (MAPWIDTH/2) + (ucWidth/2) - 1, (MAPHEIGHT/2) - (ucHeight/2), WALL_MIDDLE);
     }
     
-    if(ucRoomType == 1U)
+    if(ucRoomType == 2U)
     {/*
 	    /// Room Type 1
 	    /// 1. Draw 4 walls of random length on each of the 4 edges of the screen.
 	    /// 2. Pick a random spot on one of the 4 walls to start from.
 	    /// 3. Pick an exit on one of the 3 other walls.
 	    /// 4. Draw diagonal walls to connect the 4 walls that are already drawn.
-	    /// 5. Sprinkle monsters and items.
 	
 	    unsigned char ucStart = 0U;
 	    unsigned char ucRandom1 = 0U;
@@ -241,7 +306,7 @@ void MAP_DrawMyMap(void)
 	{
 		for(unsigned char i = 0U; i < MAPWIDTH; i++)
 		{
-		    SetTile(i, j, TileIs(i, j));
+		    SetTile(i+3, j+7, TileIs(i, j));
 		}
 	}	
 }
@@ -328,7 +393,6 @@ void DrawLine(unsigned char ucStartX, unsigned char ucStartY,
     for(signed char t = 0; t <= (distance + 1); t++) 
 	{
 		Draw(ucStartX, ucStartY, cTile);
-		//objMap[ucStartX/4][ucStartY] |= WALL << ((ucStartX%4)*2);
         
         xerr += delta_x;
         yerr += delta_y;

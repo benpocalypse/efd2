@@ -26,13 +26,14 @@
 #include <avr/interrupt.h>
 #include <uzebox.h>
 
+#include "gamemanager.h"
 #include "map.h"
 #include "input.h"
 
 
 //external data
 //#include "data/fonts_8x8.pic.inc"
-#include "data/tileset.inc"
+//#include "data/tileset.inc"
 //#include "data/patches.inc"
 
 
@@ -48,9 +49,10 @@ int main(){
 	
 	unsigned char ucTime = 0;
 	
-	ClearVram();
-	SetTileTable(efd2_tiles);
-	SetFontTilesIndex(EFD2_TILES_SIZE);
+	ClearVram();	
+	
+	GAME_Init();
+    GAME_DrawHud();       
     
     MAP_InitializeMap();
 	MAP_GenerateMap(0U);
