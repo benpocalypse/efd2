@@ -45,6 +45,9 @@
 #define SCREEN_H    28U
 #define HUD_H       6U
 
+// Functions that are used universally
+unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
+
 /*
 typedef struct
 {

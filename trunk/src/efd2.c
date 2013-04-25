@@ -55,7 +55,7 @@ int main(){
     GAME_DrawHud();       
     
     MAP_InitializeMap();
-	MAP_GenerateMap(0U);
+	MAP_GenerateMap(RandomNum(0,2));
 	MAP_DrawMyMap();
 
 	
@@ -68,7 +68,7 @@ int main(){
     		srand((unsigned)ucTime);
 		    MAP_InitializeMap();
    	        MAP_DrawMyMap();
-	        MAP_GenerateMap(0U);
+	        MAP_GenerateMap(RandomNum(0,2));
 	        MAP_DrawMyMap();
 		}
 	}		
