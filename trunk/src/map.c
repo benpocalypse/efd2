@@ -1,5 +1,7 @@
 #include "map.h"
 #include "globals.h"
+#include "object.h"
+#include <stdbool.h>
 
 // Map compresipon size defines
 #define MODWIDTH	4U  // The number of tiles to be stored in a single unsigned char
@@ -12,28 +14,18 @@
 #define LEFT	2U
 #define RIGHT	3U
 
-
-// Object type that holds an item that will appear somewhere on the map.
-struct MapObject
-{
-	unsigned char ucX;
-	unsigned char ucY;
-	unsigned char ucType;
-};
-
-
 // 240 x 224 (30 x 28)
 unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
-struct MapObject    objEntrance;
-struct MapObject	objExit;
 
+struct MapObject objEntrance;
+struct MapObject objExit;
 
 
 // Internal function prototypes.
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
 static void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType);
 static void FloodFill(unsigned char x, unsigned char y, unsigned char ucType);
-void AddDoor(unsigned char ucDirection);
+static void AddDoor(unsigned char ucDirection, bool bEntrance);
 
 
 ///****************************************************************************
@@ -122,8 +114,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             DrawLine(ucWidth+1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) + 1,
                      MAPWIDTH-ucWidth2-1, (ucRoomOnePosition*(MAPHEIGHT-ucHeight)) + (ucHeight/2) + 1, MT_WALL_MID);
 
-            //AddDoor(UP);
-            //AddDoor(DOWN);
+            AddDoor(UP, true);
+            AddDoor(DOWN, false);
         }
         else
         {//...we need to make a connecting hallway with a bend.
@@ -139,8 +131,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
                 DrawLine((ucWidth/2)+1, ucHeight, (ucWidth/2)+1, MAPHEIGHT-3, MT_WALL_TOP);
                 DrawLine((ucWidth/2)+1, MAPHEIGHT-3, MAPWIDTH-ucWidth2, MAPHEIGHT-3, MT_WALL_MID);
 
-                //AddDoor(UP);
-                //AddDoor(RIGHT);
+                AddDoor(UP, true);
+                AddDoor(RIGHT, false);
             }
             else
             {//...finally, room 2 must be on top.
@@ -153,8 +145,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
                 DrawLine((ucWidth/2)+1, MAPHEIGHT-ucHeight-1, (ucWidth/2)+1, 2, MT_WALL_TOP);
                 DrawLine((ucWidth/2)+2, 2, MAPWIDTH-ucWidth2-1, 2, MT_WALL_MID);
 
-                //AddDoor(RIGHT);
-                //AddDoor(LEFT);
+                AddDoor(RIGHT, true);
+                AddDoor(LEFT, false);
             }
         }
 
@@ -189,8 +181,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             ucDoor2 = RandomNum(UP, RIGHT);
         }
         
-        //AddDoor(ucDoor);
-        //AddDoor(ucDoor2);
+        AddDoor(ucDoor, true);
+        AddDoor(ucDoor2, false);
     }
 
     // A long skinny room, with doors at opposite ends.
@@ -213,8 +205,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             FloodFill(MAPWIDTH/2,MAPHEIGHT/2, MT_FLOOR);
 
             // And add the doors.
-            //AddDoor(LEFT);
-            //AddDoor(RIGHT);
+            AddDoor(LEFT, true);
+            AddDoor(RIGHT, false);
         }
         else
         {
@@ -233,8 +225,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             FloodFill(MAPWIDTH/2,MAPHEIGHT/2, MT_FLOOR);
 
             // And add the doors.
-            //AddDoor(UP);
-            //AddDoor(DOWN);
+            AddDoor(UP, true);
+            AddDoor(DOWN, false);
         }
     }
 }
@@ -271,6 +263,12 @@ void MAP_DrawMyMap(void)
 		    }
 		}
 	}	
+}
+
+void MAP_DrawObjects(void)
+{
+    SetTile(objEntrance.ucX+3, objEntrance.ucY+7, objEntrance.ucType);
+    SetTile(objExit.ucX+3, objExit.ucY+7, objExit.ucType);    
 }
 
 
@@ -430,11 +428,10 @@ void FloodFill(unsigned char x, unsigned char y,
 	 {
          FloodFill(i, y + 1, ucType);
 	 }
-   }
- }
+    }
+}
 
-
-void AddDoor(unsigned char ucDirection)
+void AddDoor(unsigned char ucDirection, bool bEntrance)
 {
     // If our entry door is to be on the top, scan left to right, top to bottom for a spot
     // to add it.
@@ -444,9 +441,21 @@ void AddDoor(unsigned char ucDirection)
         {
             for(unsigned char i = 0; i < MAPWIDTH; i++)
             {
-                if((TileIs(i, j) == WALL_TOP) || (TileIs(i, j) == WALL_MIDDLE))
+                if((MAP_TileIs(i, j) == MT_WALL_TOP) || (MAP_TileIs(i, j) == MT_WALL_MID))
                 {
-                    Draw(i+RandomNum(3, 7), j, DOOR);
+                    if(bEntrance == true)
+                    {
+                        objEntrance.ucX = i+RandomNum(3, 7);
+                        objEntrance.ucY = j;
+                        objEntrance.ucType = DOOR;
+                    }
+                    else
+                    {
+                        objExit.ucX = i+RandomNum(3,7);
+                        objExit.ucY = j;
+                        objExit.ucType = DOOR;
+                    }
+                    
                     return;
                 }                
             }            
@@ -461,9 +470,21 @@ void AddDoor(unsigned char ucDirection)
         {
             for(unsigned char i = (MAPWIDTH-1); i > 0; i--)
             {
-                if((TileIs(i, j) == WALL_TOP) || (TileIs(i, j) == WALL_MIDDLE))
+                if((MAP_TileIs(i, j) == MT_WALL_TOP) || (MAP_TileIs(i, j) == MT_WALL_MID))
                 {
-                    Draw(i-RandomNum(1,4), j, DOOR);
+                    if(bEntrance == true)
+                    {
+                        objEntrance.ucX = i-RandomNum(1,4);
+                        objEntrance.ucY = j;
+                        objEntrance.ucType = DOOR;
+                    }
+                    else
+                    {
+                        objExit.ucX = i-RandomNum(1,4);
+                        objExit.ucY = j;
+                        objExit.ucType = DOOR;
+                    }
+
                     return;
                 }
             }
@@ -478,9 +499,21 @@ void AddDoor(unsigned char ucDirection)
         {
             for(unsigned char j = (MAPHEIGHT-1); j > 0; j--)
             {
-                if((TileIs(i, j) == WALL_TOP) || (TileIs(i, j) == WALL_MIDDLE))
+                if((MAP_TileIs(i, j) == MT_WALL_TOP) || (MAP_TileIs(i, j) == MT_WALL_MID))
                 {
-                    Draw(i, j-RandomNum(3,6), DOOR);
+                    if(bEntrance == true)
+                    {
+                        objEntrance.ucX = i;
+                        objEntrance.ucY = j-RandomNum(3,6);
+                        objEntrance.ucType = DOOR;
+                    }
+                    else
+                    {
+                        objExit.ucX = i;
+                        objExit.ucY = j-RandomNum(3,6);
+                        objExit.ucType = DOOR;
+                    }
+                    
                     return;
                 }
             }
@@ -495,9 +528,21 @@ void AddDoor(unsigned char ucDirection)
         {
             for(unsigned char j = (MAPHEIGHT-1); j > 0; j--)
             {
-                if((TileIs(i, j) == WALL_TOP) || (TileIs(i, j) == WALL_MIDDLE))
+                if((MAP_TileIs(i, j) == WALL_TOP) || (MAP_TileIs(i, j) == MT_WALL_MID))
                 {
-                    Draw(i, j-RandomNum(2,4), DOOR);
+                    if(bEntrance == true)
+                    {
+                        objEntrance.ucX = i;
+                        objEntrance.ucY = j-RandomNum(2,4);
+                        objEntrance.ucType = DOOR;
+                    }
+                    else
+                    {
+                        objExit.ucX = i;
+                        objExit.ucY = j-RandomNum(2,4);
+                        objExit.ucType = DOOR;
+                    }
+                
                     return;
                 }
             }

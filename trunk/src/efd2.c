@@ -57,6 +57,7 @@ int main(){
     MAP_InitializeMap();
 	MAP_GenerateMap(RandomNum(0,2));
 	MAP_DrawMyMap();
+	MAP_DrawObjects();
 
 	
 	while(1)
@@ -70,6 +71,7 @@ int main(){
    	        MAP_DrawMyMap();
 	        MAP_GenerateMap(RandomNum(0,2));
 	        MAP_DrawMyMap();
+	        MAP_DrawObjects();
 		}
 	}		
 	
