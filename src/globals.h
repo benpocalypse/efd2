@@ -1,10 +1,6 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-// Bools
-#define FALSE 0U
-#define TRUE  1U
-
 // Item related defines, a total of 16 in game items.
 #define HEALTH_POTION     0x0001
 #define HASTE_POTION      0x0002
@@ -48,7 +44,9 @@
 // Functions that are used universally
 unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
 
-/*
+
+// Holds the X/Y coordinates of a player, enemy, or other object that
+// need's pixel perfect accuracy
 typedef struct
 {
     unsigned char ucBigX;
@@ -56,19 +54,5 @@ typedef struct
     unsigned char ucSmallX;
     unsigned char ucSmallY;
 } COORDINATE;
-
-
-
-unsigned char IsCarrying(unsigned int uiInv, unsigned int uiItem)
-{
-    if((uiInv & uiItem) && uiItem) == TRUE)
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-}*/
 
 #endif
