@@ -15,6 +15,7 @@
 void MAP_InitializeMap(void);
 void MAP_GenerateMap(unsigned char ucRoomType);
 void MAP_DrawMyMap(void);
+void MAP_DrawObjects(void);
 unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY);
 
 #endif
