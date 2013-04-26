@@ -1,4 +1,5 @@
 #include "player.h"
+#include "globals.h"
 
 // Holds our classes Player data internally.
 static PLAYER objPlayer;
@@ -14,6 +15,7 @@ unsigned char PLY_Init(void)
     objPlayer.ucGold = 0U;
     objPlayer.uiInventory = 0U;
     objPlayer.ucScreensPassed = 0U;
+    objPlayer.ucVelocityAndDirection = NO_DIR;
     objPlayer.objLocation.ucBigX = 0U;
     objPlayer.objLocation.ucBigY = 0U;
     objPlayer.objLocation.ucSmallX = 0U;
@@ -96,6 +98,33 @@ unsigned char PLY_GetScreensPassed(void)
     return objPlayer.ucScreensPassed;
 }
 
+
+unsigned char PLY_GetVelocity(void)
+{
+    return ((objPlayer.ucVelocityAndDirection & 0xF0) >> 4);
+}
+
+
+void PLY_SetVelocity(unsigned char ucVel)
+{
+    objPlayer.ucVelocityAndDirection &= 0x0F;
+    objPlayer.ucVelocityAndDirection |= (ucVel << 4);
+}
+
+
+unsigned char PLY_GetDirection(void)
+{
+    return objPlayer.ucVelocity & 0x0F;
+}
+
+
+void PLY_SetDirection(unsigned char ucDir)
+{
+    objPlayer.ucVelocityAndDirection &= 0xF0;
+    objPlayer.ucVelocityAndDirection |= ucDir;
+}
+
+
 ///****************************************************************************
 /// Simple getter for the player's current location.
 ///****************************************************************************
@@ -103,3 +132,12 @@ COORDINATE PLY_GetCoordinate(void)
 {
     return objPlayer.objLocation;
 }
+
+void PLY_SetCoordinate(COORDINATE objNewCoord)
+{
+    objPlayer.objLocation.ucBigX = objNewCoord.ucBigX;
+    objPlayer.objLocation.ucBigY = objNewCoord.ucBigY;
+    objPlayer.objLocation.ucSmallX = objNewCoord.ucSmallX;
+    objPlayer.objLocation.ucSmallY = objNewCoord.ucSmallY;
+}
+

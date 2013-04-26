@@ -1,14 +1,23 @@
 #include "gamemanager.h"
 #include <avr/pgmspace.h>
 #include <uzebox.h>
-#include "data/tileset.inc"
 #include "globals.h"
+
+// Include our tile data
+#include "data/tileset.inc"
+
 
 
 void GAME_Init(void)
 {
     SetTileTable(efd2_tiles);
-	SetFontTilesIndex(EFD2_TILES_SIZE);
+    //SetSpriteVisibility(false);
+	//SetFontTilesIndex(EFD2_TILES_SIZE);
+}
+
+void GAME_ManageGame(void)
+{
+    //SetSpriteVisibility(true);
 }
 
 void GAME_DrawHud(void)

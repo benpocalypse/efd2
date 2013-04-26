@@ -8,12 +8,6 @@
 #define MODSHIFT    2U  // The number of bits to shift when compressing our tiles
 #define MODBITS     3U // The bits for an OR/AND mask in half of an unsigned char
 
-// Defines that tell us which side of the map our entrance/exit is on.
-#define UP		0U
-#define DOWN	1U
-#define LEFT	2U
-#define RIGHT	3U
-
 // 240 x 224 (30 x 28)
 unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
 
@@ -233,7 +227,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
 
 
 ///****************************************************************************
-/// Draws the current map structure.
+/// Draws the current map structure in the center of the screen to allow room
+/// for the HUD to be drawn as well.
 ///****************************************************************************
 void MAP_DrawMyMap(void)
 {
@@ -248,16 +243,16 @@ void MAP_DrawMyMap(void)
 		    switch(ucTile)
 		    {
 		        case MT_FLOOR:
-    		        SetTile(i+3, j+7, ucFloor);
+    		        SetTile(i+MAP_X_OFFSET, j+MAP_Y_OFFSET, ucFloor);
 		            break;
 		        case MT_WALL_TOP:
-		            SetTile(i+3, j+7, WALL_TOP);
+		            SetTile(i+MAP_X_OFFSET, j+MAP_Y_OFFSET, WALL_TOP);
 		            break;
 		        case MT_WALL_MID:
-		            SetTile(i+3, j+7, WALL_MIDDLE);
+		            SetTile(i+MAP_X_OFFSET, j+MAP_Y_OFFSET, WALL_MIDDLE);
 		            break;
 		        default:
-		            SetTile(i+3, j+7, EMPTY);
+		            SetTile(i+MAP_X_OFFSET, j+MAP_Y_OFFSET, EMPTY);
 		            break;
 		            
 		    }
@@ -265,6 +260,11 @@ void MAP_DrawMyMap(void)
 	}	
 }
 
+
+///****************************************************************************
+/// This function draws all non-tile objects in the map class on the map.
+/// FIXME - Is this really how we should handle this?
+///****************************************************************************
 void MAP_DrawObjects(void)
 {
     SetTile(objEntrance.ucX+3, objEntrance.ucY+7, objEntrance.ucType);
