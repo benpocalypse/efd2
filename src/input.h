@@ -3,20 +3,20 @@
 
 typedef enum
 {
-    NONE,
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    A,
-    B,
-    X,
-    Y,
-    L,
-    R,
-    SELECT,
-    START,
-    UNKNOWN
+    IN_NONE,
+    IN_UP,
+    IN_DOWN,
+    IN_LEFT,
+    IN_RIGHT,
+    IN_A,
+    IN_B,
+    IN_X,
+    IN_Y,
+    IN_L,
+    IN_R,
+    IN_SELECT,
+    IN_START,
+    IN_UNKNOWN
     
 } C_INPUT;
 

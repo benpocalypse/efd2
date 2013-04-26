@@ -31,13 +31,11 @@
 #include "input.h"
 
 
-//external data
+// External data
 //#include "data/fonts_8x8.pic.inc"
 //#include "data/tileset.inc"
 //#include "data/patches.inc"
 
-
-unsigned char processControls(void);
 
 int main(){
 	//TriggerFx(0,0,0);

@@ -37,9 +37,18 @@
 
 
 // Video related defines
-#define SCREEN_W    30U
-#define SCREEN_H    28U
-#define HUD_H       6U
+#define SCREEN_W        30U
+#define SCREEN_H        28U
+#define HUD_H           6U
+#define MAP_X_OFFSET    3U
+#define MAP_Y_OFFSET    7U
+
+// Directional defines
+#define UP		0U
+#define DOWN	1U
+#define LEFT	2U
+#define RIGHT	3U
+#define NO_DIR  4U
 
 // Functions that are used universally
 unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
