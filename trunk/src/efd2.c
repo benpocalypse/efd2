@@ -1,5 +1,5 @@
 /*
- *  Uzebox(tm) Escape from Dungeon 2
+ *  Uzebox(tm) - Escape from Dungeon 2
  *  Copyright (C) 2013 Ben Foote
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -61,8 +61,10 @@ int main(){
 	while(1)
 	{
 	    ucTime++;
-		WaitVsync(1);
-		if(INPUT_GetButton() == START)
+		WaitVsync(1);        
+        GAME_ManageGame():
+
+		if(INPUT_GetButton(START) == true)
 		{
     		srand((unsigned)ucTime);
 		    MAP_InitializeMap();

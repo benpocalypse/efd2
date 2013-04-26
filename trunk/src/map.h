@@ -11,11 +11,12 @@
 #define MT_WALL_TOP 2U
 #define MT_WALL_MID 3U
 
-
+// Public Map Class functions
 void MAP_InitializeMap(void);
 void MAP_GenerateMap(unsigned char ucRoomType);
 void MAP_DrawMyMap(void);
 void MAP_DrawObjects(void);
+MapObject     MAP_GetDoor(unsigned char bEntrance);
 unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY);
 
 #endif

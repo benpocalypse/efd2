@@ -1,7 +1,8 @@
 #include "gamemanager.h"
+#include "globals.h"
+#include "logicmanager.h"
 #include <avr/pgmspace.h>
 #include <uzebox.h>
-#include "globals.h"
 
 // Include our tile data
 #include "data/tileset.inc"
@@ -11,19 +12,20 @@
 void GAME_Init(void)
 {
     SetTileTable(efd2_tiles);
+    LGC_Init();
+    LGC_Start();
     //SetSpriteVisibility(false);
 	//SetFontTilesIndex(EFD2_TILES_SIZE);
 }
 
 void GAME_ManageGame(void)
 {
-    //SetSpriteVisibility(true);
+    LGC_ManageLogic();
+    //SetSpriteVisibility(true);    
 }
 
 void GAME_DrawHud(void)
 {
-
-
     // Draw the vertical lines.
     for(unsigned char i=1;i<28;i++)
     {

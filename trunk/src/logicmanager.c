@@ -7,6 +7,7 @@
 
 #include <uzebox.h>
 
+// Allows the Logic Manager class to access our sprite tiles
 #include "data/sprites.inc"
 
 // Player sprite related defines
@@ -17,6 +18,8 @@
 #define PLAYER_RUN3         2U
 #define PLAYER_RUN4         0U
 #define PLAYER_RUN_FRAMES   4U
+
+#define FRAME_COUNTER       9U
 
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
@@ -34,10 +37,11 @@ enum LOGIC_STATE
 
 
 // Private class variables
-LOGIC_STATE eCurrentState;
-LOGIC_STATE eRequestedState;
-unsigned char ucPlayerRunFrame;
-unsigned char ucPlayerRun[PLAYER_RUN_FRAMES];
+static LOGIC_STATE eCurrentState;
+static LOGIC_STATE eRequestedState;
+static unsigned char ucPlayerRunFrame;
+static unsigned char ucPlayerRun[PLAYER_RUN_FRAMES];
+static unsigned char bRunning;
 
 
 // Private class functions
@@ -51,6 +55,9 @@ static void ProcessUpdatePlayer(void);
 static void ProcessEnemyLogic(void);
 static void ProcessCollisions(void);
 
+// Internal helper functions
+static COORDINATE GetPlayerStartLocation(void);
+static void DrawPlayer(void);
 
 ///****************************************************************************
 /// Simply initializes all of our Logic related variables to a default state.
@@ -59,6 +66,7 @@ void LGC_Init(void)
 {
     eCurrentState = UNKNOWN;
     eRequestedState = INIT;
+    bRunning = false;
     
     // Now handle some sprite inits.
     SetSpritesTileTable(efd2_sprites);
@@ -68,11 +76,12 @@ void LGC_Init(void)
     sprites[PLAYER_SPRITE].y = OFF_SCREEN;
     sprites[PLAYER_SPRITE].flags = 0U;
     
+    // Now set up our player animation variables.
     ucPlayerRunFrame = 0U;
     ucPlayerRun[0] = PLAYER_RUN1;
     ucPlayerRun[1] = PLAYER_RUN2;
     ucPlayerRun[2] = PLAYER_RUN3;
-    ucPlayerRun[3] = PLAYER_RUN4;
+    ucPlayerRun[3] = PLAYER_RUN4;    
 }
 
 
@@ -82,8 +91,11 @@ void LGC_Init(void)
 ///****************************************************************************
 void LGC_ManageLogic(void)
 {
-    if(bRunning = true)
+    if(bRunning == true)
     {    
+        // FIXME - This should be handled elsewhere.
+        DrawPlayer();
+
         // If we're supposed to switch states, take care of that here.
         if(eCurrentState != eRequestedState)
         {
@@ -142,26 +154,7 @@ void ModeExit(LOGIC_STATE eState)
 {
     switch(eState)
     {
-        case INIT:
-            for(unsigned char j = 0; j < MAPHEIGHT; j++)
-            {
-                for(unsigned char i = 0; i < MAPWIDTH; i++)
-                {
-                    if(MAP_TileIs(i, j) == MT_FLOOR)
-                    {
-                        COORDINATE objNewCoord;
-                        objNewCoord.ucBigX = i;
-                        objNewCoord.ucBigY = j;
-                        objNewCoord.ucSmallX = 0U;
-                        objNewCoord.ucSmallY = 0U;
-                        
-                        PLY_SetCoordinate(objNewCoord);
-                        sprites[PLAYER_SPRITE].x = (i+MAP_X_OFFSET)*8;
-                        sprites[PLAYER_SPRITE].y = (j+MAP_Y_OFFSET)*8;
-                        // FIXME - It'l too late, and I dont know what I'm doing.
-                    }
-                }
-            }
+        case INIT:            
             break;
         
         case PROCESS_INPUT:
@@ -211,52 +204,100 @@ void ModeEntry(LOGIC_STATE eState)
 }
 
 
+///****************************************************************************
+/// Here, we just initialize all of our internal variables in order to start
+/// a new screen in our dungeon.
+///****************************************************************************
 void ProcessInit(void)
 {
+    // Put our player next to the entry door.
+    PLY_SetCoordinate(SetPlayerStartLocation());
+
+    // Now switch to our next state.
     eRequestedState = PROCESS_INPUT;
 }
 
+
+///****************************************************************************
+/// This function looks at what button the player is pressing, and then sets up
+/// the direction and speed with which the player wants to move. Keep in mind
+/// we don't actually move at all yet, just get ready to do so.
+///****************************************************************************
 void ProcessInput(void)
 {
-    if(INPUT_GetButton() == IN_UP)
-    {
-        PLY_SetDirection(UP);
-        if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
-        {
-            PLY_SetVelocity(++PLY_GetVelocity());
+    // If the player presses up...
+    if(INPUT_GetButton(IN_UP) == true)
+    {//...and we were going up before...
+        if(PLY_GetDirection() == UP)
+        {// then speed up!
+            if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
+            {
+                PLY_SetVelocity(++PLY_GetVelocity());
+            }
+        }
+        else
+        {//...otherwise, start going up.
+            PLY_SetDirection(UP);
+            PLY_SetVelocity(1U);
         }
     }
     
-    if(INPUT_GetButton() == IN_LEFT)
-    {
-        PLY_SetDirection(LEFT);
-        if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
-        {
-            PLY_SetVelocity(++PLY_GetVelocity());
+    // If the player presses left...
+    if(INPUT_GetButton(IN_LEFT) == true)
+    {//...and we were going left before...
+        if(PLY_GetDirection() == LEFT)
+        {// then speed up!
+            if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
+            {
+                PLY_SetVelocity(++PLY_GetVelocity());
+            }
+        }
+        else
+        {//...otherwise start going left.
+            PLY_SetDirection(LEFT);
+            PLY_SetVelocity(1U);
         }
     }
     
-    if(INPUT_GetButton() == IN_RIGHT)
-    {
-        PLY_SetDirection(RIGHT);
-        if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
-        {
-            PLY_SetVelocity(++PLY_GetVelocity());
+    // If the player presses right...
+    if(INPUT_GetButton(IN_RIGHT) == true)
+    {//...and we were going right before...
+        if(PLY_GetDirection() == RIGHT)
+        {// then speed up!
+            if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
+            {
+                PLY_SetVelocity(++PLY_GetVelocity());
+            }
+        }
+        else
+        {//...otherwise start going right.
+            PLY_SetDirection(RIGHT);
+            PLY_SetVelocity(1U);
         }
     }
     
-    if(INPUT_GetButton() == DOWN)
-    {
-        PLY_SetDirection(DOWN);
-        if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
-        {
-            PLY_SetVelocity(++PLY_GetVelocity());
+    // If the player presses down...
+    if(INPUT_GetButton(IN_DOWN) == true)
+    {//...and we were going right before...
+        if(PLY_GetDirection() == DOWN)
+        {// then speed up!
+            if(PLY_GetVelocity() < MAX_PLAYER_VELOCITY)
+            {
+                PLY_SetVelocity(++PLY_GetVelocity());
+            }
+        }
+        else
+        {//...otherwise start going down.
+            PLY_SetDirection(DOWN);
+            PLY_SetVelocity(1U);
         }
     }
     
-    if(INPUT_GetButton() == IN_NONE)
+    // And finally, if the player isn't pushing anything,
+    // then stop moving!
+    if(INPUT_GetButton(IN_NONE) == true)
     {
-        PLY_SetDirection(NONE);
+        PLY_SetDirection(NO_DIR);
         PLY_SetVelocity(0U);
     }
     
@@ -264,30 +305,200 @@ void ProcessInput(void)
 }
 
 
-// FIXME - This function needs to be finished
+///****************************************************************************
+/// This function only checks for collisions between the player and the map, 
+/// and then adjusts the players position accordingly. This has nothing to do
+/// with collisions between the player and enemies or items, only to do with
+/// moving the player around the map correctly.
+///****************************************************************************
 void ProcessUpdatePlayer(void)
 {
-    if(PLY_GetDirection() == NONE)
+    // This keeps track of which frame of animation the player sprite
+    // is currently using.
+    static unsigned char ucFrameCount = 0U;
+    static unsigned char ucAnimDelay = 0U;
+
+    // First, check to see if we can move the requested amount, in the requested direction...
+    if(PLY_GetDirection() == RIGHT)
+    {
+        COORDINATE objTempCoord = PLY_GetCoordinate();
+
+        // If the tile to our right is open, then we can move right.
+        if(MAP_TileIs(objTempCoord.ucBigX+1, objTempCoord.ucBigY, MT_FLOOR) == true)
+        {
+            PLY_Move(PLY_GetVelocity(), 0);
+        }
+        else
+        {// otherwise, we ran into something, so stop moving.
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+
+    // First, check to see if we can move the requested amount, in the requested direction...
+    if(PLY_GetDirection() == LEFT)
+    {
+        COORDINATE objTempCoord = PLY_GetCoordinate();
+
+        // If the tile to our left is open, then we can move left.
+        if(MAP_TileIs(objTempCoord.ucBigX-1, objTempCoord.ucBigY, MT_FLOOR) == true)
+        {
+            PLY_Move(-PLY_GetVelocity(), 0);
+        }
+        else
+        {// otherwise, we ran into something, so stop moving.
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+
+    // First, check to see if we can move the requested amount, in the requested direction...
+    if(PLY_GetDirection() == UP)
+    {
+        COORDINATE objTempCoord = PLY_GetCoordinate();
+
+        // If the tile to our north is open, then we can move north.
+        if(MAP_TileIs(objTempCoord.ucBigX, objTempCoord.ucBigY-1, MT_FLOOR) == true)
+        {
+            PLY_Move(0, -PLY_GetVelocity());
+        }
+        else
+        {// otherwise, we ran into something, so stop moving.
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+
+    // First, check to see if we can move the requested amount, in the requested direction...
+    if(PLY_GetDirection() == DOWN)
+    {
+        COORDINATE objTempCoord = PLY_GetCoordinate();
+
+        // If the tile to our south is open, then we can move south.
+        if(MAP_TileIs(objTempCoord.ucBigX, objTempCoord.ucBigY+1, MT_FLOOR) == true)
+        {
+            PLY_Move(0, PLY_GetVelocity());
+        }
+        else
+        {// otherwise, we ran into something, so stop moving.
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+
+
+    // If we're not moving, set our sprite to the idle state.
+    if(PLY_GetDirection() == NO_DIR)
     {
         sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
     }
     else
-    {
-        sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES-1)];
+    {//...otherwise, we're running, so let's animate.
+        // Here we just try to determine which way to flip the player sprite.
+        if(PLY_GetDirection() == LEFT)
+        {
+            sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
+        }
+
+        if(PLY_GetDirection() == RIGHT)
+        {
+            sprites[PLAYER_SPRITE].flags = 0;
+        }
+
+        // If we're running, we just loop our running animations.
+        if(ucAnimDelay == 0)
+        {
+            sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
+        }
     }
+
+    // This is just used to ensure we only change animation frames every
+    // 150mS by delaying our animation updates.
+    (ucAnimDelay++)%(FRAME_COUNTER);
     
-    //if(PLY_GetDirection() == RIGHT)
-    
+    eRequestedState = ENEMY_LOGIC;
+}
+
+
+// FIXME - Implement functionality
+void ProcessEnemyLogic(void)
+{
     eRequestedState = COLLISIONS;
 }
 
-void ProcessEnemyLogic(void)
-{
-    // FIXME - duh    
-}
 
+// FIXME - Implement functionality
 void ProcessCollisions(void)
 {
     eRequestedState = PROCESS_INPUT;
 }
 
+
+///****************************************************************************
+/// This is a helper function that will place the player next to the entrance
+/// door. All it does is get the location of the entrance, and check the four
+/// tiles adjacent to see if they're open floor.
+///****************************************************************************
+COORDINATE SetPlayerStartLocation(void)
+{
+    // Start by getting the location of our entry door.
+    MapObject objTempMapLocation = MAP_GetDoor(true);
+    COORDINATE objTempCoord;
+
+    objTempCoord.ucBigX = 0U;
+    objTempCoord.ucBigY = 0U;
+    objTempCoord.scSmallX = 0;
+    objTempCoord.scSmallY = 0;
+
+    // Then find a spot next to the entry door that is open (aka is floor)
+    if(MAP_TileIs(objTempMapLocation.ucX+1, objTempMapLocation.ucY, MT_FLOOR) == true)
+    {
+        objTempCoord.ucBigX = objTempMapLocation.ucX+1;
+        objTempCoord.ucBigY = objTempMapLocation.ucY;
+
+        return objTempCoord;
+    }
+
+    if(MAP_TileIs(objTempMapLocation.ucX-1, objTempMapLocation.ucY, MT_FLOOR) == true)
+    {
+        objTempCoord.ucBigX = objTempMapLocation.ucX-1;
+        objTempCoord.ucBigY = objTempMapLocation.ucY;
+
+        return objTempCoord;
+    }
+
+    if(MAP_TileIs(objTempMapLocation.ucX, objTempMapLocation.ucY+1, MT_FLOOR) == true)
+    {
+        objTempCoord.ucBigX = objTempMapLocation.ucX;
+        objTempCoord.ucBigY = objTempMapLocation.ucY+1;
+
+        return objTempCoord;
+    }
+
+    if(MAP_TileIs(objTempMapLocation.ucX, objTempMapLocation.ucY-1, MT_FLOOR) == true)
+    {
+        objTempCoord.ucBigX = objTempMapLocation.ucX;
+        objTempCoord.ucBigY = objTempMapLocation.ucY-1;
+
+        return objTempCoord;
+    }
+
+    return objTempCoord;
+}
+
+
+///****************************************************************************
+/// All this helper function does is update the Player's sprite to the 
+/// appropriate X/Y location on the screen, to reduce function clutter.
+///****************************************************************************
+void DrawPlayer(void)
+{
+    // First get our players coordinate within the map (which is going to be 
+    // centered in the middle of the screen.)
+    COORDINATE objTempCoord = PLY_GetCoordinate();
+
+    // Then put our player sprite where it is supposed to be, by offsetting it's
+    // position the correct amount.
+    sprites[PLAYER_SPRITE].x = ((objTempCoord.ucBigX + MAP_X_OFFSET)*TILE_SIZE) + objTempCoord.scSmallX);
+    sprites[PLAYER_SPRITE].y = ((objTempCoord.ucBigY + MAP_Y_OFFSET)*TILE_SIZE) + objTempCoord.scSmallY);
+}
