@@ -8,14 +8,14 @@
 #define MODSHIFT    2U  // The number of bits to shift when compressing our tiles
 #define MODBITS     3U // The bits for an OR/AND mask in half of an unsigned char
 
-// 240 x 224 (30 x 28)
-unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
+// Our map data storage array
+static unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
 
-struct MapObject objEntrance;
-struct MapObject objExit;
+// Our entry and exit door objects.
+static struct MapObject objEntrance;
+static struct MapObject objExit;
 
-
-// Internal function prototypes.
+// Private function prototypes
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
 static void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType);
 static void FloodFill(unsigned char x, unsigned char y, unsigned char ucType);
@@ -39,7 +39,8 @@ void MAP_InitializeMap(void)
 
 ///****************************************************************************
 /// This function takes care of actually generating the 'maze' and fills it
-/// with the appropriate tiles.
+/// with the appropriate tiles. The argument just tells us which type of 
+/// random room we're going to generate.
 ///****************************************************************************
 void MAP_GenerateMap(unsigned char ucRoomType)
 {
@@ -271,6 +272,21 @@ void MAP_DrawObjects(void)
     SetTile(objExit.ucX+3, objExit.ucY+7, objExit.ucType);    
 }
 
+///****************************************************************************
+/// Returns the location of either the entrance or exit of the map.
+///****************************************************************************
+MapObject MAP_GetDoor(unsigned char bEntrance)
+{
+    if(bEntrance == true)
+    {
+        return objEntrance;
+    }
+    else
+    {
+        return objExit;
+    }
+}
+
 
 ///****************************************************************************
 /// This function allows outside classes to see which tiles are at which X/Y
@@ -371,7 +387,8 @@ void DrawLine(unsigned char ucStartX, unsigned char ucStartY,
 
 
 ///****************************************************************************
-/// Sets the passed tile to the passed in Type.
+/// Sets the tile at x/y to the passed in Type. This uses some tricky math
+/// to work with our compressed map structure.
 ///****************************************************************************
 void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType)
 {
@@ -383,7 +400,8 @@ void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType)
 
 
 ///****************************************************************************
-/// Fills the specified x,y empty space with the destination tile.
+/// Fills the specified x,y empty space with the destination tile until a 
+/// non-empty tile is encountered.
 ///****************************************************************************
 void FloodFill(unsigned char x, unsigned char y, 
 				unsigned char ucType)
@@ -431,6 +449,12 @@ void FloodFill(unsigned char x, unsigned char y,
     }
 }
 
+
+///****************************************************************************
+/// This function adds doors to our map based on the type of map we've 
+/// generated. Essentially, we want the entrance and exit to a room to be
+/// fairly far apart to force the player to navigate our maze.
+///****************************************************************************
 void AddDoor(unsigned char ucDirection, bool bEntrance)
 {
     // If our entry door is to be on the top, scan left to right, top to bottom for a spot

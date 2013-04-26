@@ -35,6 +35,8 @@
 #define HUD_HORIZ   41
 #define HUD_VERT    42
 
+// Collision detection defines
+#define TILE_SIZE           8U
 
 // Video related defines
 #define SCREEN_W        30U
@@ -60,8 +62,8 @@ typedef struct
 {
     unsigned char ucBigX;
     unsigned char ucBigY;
-    unsigned char ucSmallX;
-    unsigned char ucSmallY;
+    signed char scSmallX;
+    signed char scSmallY;
 } COORDINATE;
 
 #endif

@@ -20,7 +20,7 @@ typedef enum
     
 } C_INPUT;
 
-C_INPUT INPUT_GetButton(void);
+unsigned char INPUT_GetButton(C_INPUT eButton);
 
 #endif
 
