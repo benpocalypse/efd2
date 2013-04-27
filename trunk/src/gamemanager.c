@@ -6,12 +6,15 @@
 
 // Include our tile data
 #include "data/tileset.inc"
+#include "data/font8x8.pic.inc"
 
 
 
 void GAME_Init(void)
 {
     SetTileTable(efd2_tiles);
+    ClearVram();
+    SetFontTilesIndex(EFD2_TILES_SIZE);
     LGC_Init();
     LGC_Start();
     //SetSpriteVisibility(false);

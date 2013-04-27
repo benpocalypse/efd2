@@ -29,15 +29,16 @@
 #include "gamemanager.h"
 #include "map.h"
 #include "input.h"
+#include "globals.h"
 
 
 // External data
-//#include "data/fonts_8x8.pic.inc"
 //#include "data/tileset.inc"
 //#include "data/patches.inc"
 
 
-int main(){
+int main()
+{
 	//TriggerFx(0,0,0);
 	//InitMusicPlayer(patches);
 	//SetMasterVolume(0x40);
@@ -47,7 +48,7 @@ int main(){
 	
 	unsigned char ucTime = 0;
 	
-	ClearVram();	
+	ClearVram();
 	
 	GAME_Init();
     GAME_DrawHud();       
@@ -62,9 +63,9 @@ int main(){
 	{
 	    ucTime++;
 		WaitVsync(1);        
-        GAME_ManageGame():
+        GAME_ManageGame();
 
-		if(INPUT_GetButton(START) == true)
+		if(INPUT_GetButton(IN_START) == true)
 		{
     		srand((unsigned)ucTime);
 		    MAP_InitializeMap();

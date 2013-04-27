@@ -1,6 +1,8 @@
 #ifndef _MAP_H_
 #define _MAP_H_
 
+#include "object.h"
+
 // Outside classes need to know how big our map is
 #define MAPWIDTH	24U // The actual width of the map
 #define MAPHEIGHT	18U // The actual height of the map
