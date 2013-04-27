@@ -96,10 +96,7 @@ void LGC_ManageLogic(void)
     //PrintByte(20,20,eCurrentState, false);
     
     if(bRunning == true)
-    {    
-        // FIXME - This should be handled elsewhere.
-        DrawPlayer();
-
+    {            
         // If we're supposed to switch states, take care of that here.
         if(eCurrentState != eRequestedState)
         {
@@ -134,6 +131,9 @@ void LGC_ManageLogic(void)
             default:
                 break;          
         }
+        
+        // FIXME - This should be handled elsewhere.
+        DrawPlayer();
     }
 }
 
@@ -305,8 +305,16 @@ void ProcessInput(void)
     // then stop moving!
     if(INPUT_GetButton(IN_NONE) == true)
     {
-        PLY_SetDirection(NO_DIR);
-        PLY_SetVelocity(0U);
+        unsigned char ucVel = PLY_GetVelocity();
+        
+        if(ucVel == 0U)
+        {
+            PLY_SetDirection(NO_DIR);
+        }
+        else
+        {
+            PLY_SetVelocity(--ucVel);
+        }
     }
     
     eRequestedState = UPDATE_PLAYER;
@@ -337,9 +345,17 @@ void ProcessUpdatePlayer(void)
             PLY_Move(PLY_GetVelocity(), 0);
         }
         else
-        {// otherwise, we ran into something, so stop moving.
-            PLY_SetDirection(NO_DIR);
-            PLY_SetVelocity(0U);
+        {
+            // We've crossed into a wall, so move the player back to even.
+            if(objTempCoord.scSmallX > 0)
+            {
+                PLY_Move(-objTempCoord.scSmallX, 0);
+            }
+            else
+            {// otherwise, we ran into something, so stop moving.
+                PLY_SetDirection(NO_DIR);
+                PLY_SetVelocity(0U);
+            }
         }
     }
 
@@ -354,9 +370,25 @@ void ProcessUpdatePlayer(void)
             PLY_Move(-PLY_GetVelocity(), 0);
         }
         else
-        {// otherwise, we ran into something, so stop moving.
-            PLY_SetDirection(NO_DIR);
-            PLY_SetVelocity(0U);
+        {            
+            // We're next to a wall, so only move until we run into it...
+            if(objTempCoord.scSmallX > 0)
+            {
+                // Now decide if we can move at full speed, or have to slow down.
+                if(objTempCoord.scSmallX >= PLY_GetVelocity())
+                {
+                    PLY_Move(-PLY_GetVelocity(), 0);
+                }
+                else
+                {
+                    PLY_Move(-1, 0);
+                }
+            }
+            else
+            {// otherwise, we ran into something, so stop moving.
+                PLY_SetDirection(NO_DIR);
+                PLY_SetVelocity(0U);
+            }
         }
     }
 
@@ -371,9 +403,25 @@ void ProcessUpdatePlayer(void)
             PLY_Move(0, -PLY_GetVelocity());
         }
         else
-        {// otherwise, we ran into something, so stop moving.
-            PLY_SetDirection(NO_DIR);
-            PLY_SetVelocity(0U);
+        {
+            // We're next to a wall, so only move until we run into it...
+            if(objTempCoord.scSmallY > 0)
+            {
+                // Now decide if we can move at full speed, or have to slow down.
+                if(objTempCoord.scSmallY >= PLY_GetVelocity())
+                {
+                    PLY_Move(0, -PLY_GetVelocity());
+                }
+                else
+                {
+                    PLY_Move(0, -1);
+                }
+            }
+            else
+            {// otherwise, we ran into something, so stop moving.
+                PLY_SetDirection(NO_DIR);
+                PLY_SetVelocity(0U);
+            }
         }
     }
 
@@ -388,9 +436,17 @@ void ProcessUpdatePlayer(void)
             PLY_Move(0, PLY_GetVelocity());
         }
         else
-        {// otherwise, we ran into something, so stop moving.
-            PLY_SetDirection(NO_DIR);
-            PLY_SetVelocity(0U);
+        {
+            // We've crossed into a wall, so move the player back to even.
+            if(objTempCoord.scSmallY > 0)
+            {
+                PLY_Move(0, -objTempCoord.scSmallY);
+            }
+            else
+            {// otherwise, we ran into something, so stop moving.
+                PLY_SetDirection(NO_DIR);
+                PLY_SetVelocity(0U);
+            }
         }
     }
 
