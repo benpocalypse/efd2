@@ -60,7 +60,7 @@ int main()
 	while(1)
 	{
 	    ucTime++;
-		WaitVsync(1);        
+		WaitVsync(1);
         GAME_ManageGame();
 
 		if(INPUT_GetButton(IN_START) == true)

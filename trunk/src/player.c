@@ -2,8 +2,7 @@
 
 
 // Player class specific defines
-#define MAX_SMALL_LOC   4
-#define MIN_SMALL_LOC  -4
+#define MAX_SMALL_LOC   8
 
 // Holds our classes Player data internally.
 static PLAYER objPlayer;
@@ -145,38 +144,54 @@ void PLY_SetCoordinate(COORDINATE objNewCoord)
 
 ///****************************************************************************
 /// Move the players current location the correct number of pixels, taking care
-/// of wrapping the Big/Small locations.
+/// of wrapping the Big/Small coordinates.
 ///****************************************************************************
 void PLY_Move(signed char scX, signed char scY)
 {
-    objPlayer.objLocation.scSmallX += scX;
-    objPlayer.objLocation.scSmallY += scY;
+    signed char scTempX = objPlayer.objLocation.scSmallX;
+    signed char scTempY = objPlayer.objLocation.scSmallY;
+    
+    scTempX += scX;
+    scTempY += scY;
 
-    if(objPlayer.objLocation.scSmallX >= MAX_SMALL_LOC)
-    {
+    // If we've wrapped into the next tile..
+    if(scTempX >= MAX_SMALL_LOC)
+    {// then increment our big tile location.
         objPlayer.objLocation.ucBigX += 1U;
-        objPlayer.objLocation.scSmallX -= TILE_SIZE;
+        objPlayer.objLocation.scSmallX = scTempX - TILE_SIZE;
         return;
     }
-
-    if(objPlayer.objLocation.scSmallX <= MIN_SMALL_LOC)
-    {
-        objPlayer.objLocation.ucBigX -= 1U;
-        objPlayer.objLocation.scSmallX += TILE_SIZE;
-        return;
+    else
+    {    
+        if(scTempX < 0)
+        {
+            objPlayer.objLocation.ucBigX -= 1U;
+            objPlayer.objLocation.scSmallX = TILE_SIZE + scTempX;
+            return;
+        }
+        else
+        {
+            objPlayer.objLocation.scSmallX = scTempX;
+        }
     }
 
-    if(objPlayer.objLocation.scSmallY >= MAX_SMALL_LOC)
+    if(scTempY >= MAX_SMALL_LOC)
     {
         objPlayer.objLocation.ucBigY += 1U;
-        objPlayer.objLocation.scSmallY -= TILE_SIZE;
+        objPlayer.objLocation.scSmallY = scTempY - TILE_SIZE;
         return;
     }
-
-    if(objPlayer.objLocation.scSmallY <= MIN_SMALL_LOC)
+    else
     {
-        objPlayer.objLocation.ucBigY -= 1U;
-        objPlayer.objLocation.scSmallY += TILE_SIZE;
-        return;
-    }
+        if(scTempY < 0)
+        {
+            objPlayer.objLocation.ucBigY -= 1U;
+            objPlayer.objLocation.scSmallY = TILE_SIZE + scTempY;
+            return;
+        }
+        else
+        {
+            objPlayer.objLocation.scSmallY = scTempY;
+        }
+    }    
 }

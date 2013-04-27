@@ -31,12 +31,12 @@
 #define WALL_RIGHT  14U
 #define WALL_SINGLE 15U
 
-#define HUD_CORNER  40
-#define HUD_HORIZ   41
-#define HUD_VERT    42
+#define HUD_CORNER  40U
+#define HUD_HORIZ   41U
+#define HUD_VERT    42U
 
 // Collision detection defines
-#define TILE_SIZE           8U
+#define TILE_SIZE           8
 
 // Video related defines
 #define SCREEN_W        30U
