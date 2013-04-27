@@ -43,8 +43,6 @@ int main()
 	//InitMusicPlayer(patches);
 	//SetMasterVolume(0x40);
 	//StartSong(song_nsmb);
-
-	//SetSpritesTileTable(mario_sprites_tileset);
 	
 	unsigned char ucTime = 0;
 	
@@ -69,10 +67,11 @@ int main()
 		{
     		srand((unsigned)ucTime);
 		    MAP_InitializeMap();
-   	        MAP_DrawMyMap();
+   	        MAP_DrawMyMap();   	        
 	        MAP_GenerateMap(RandomNum(0,2));
 	        MAP_DrawMyMap();
 	        MAP_DrawObjects();
+	        GAME_ScreenPassed();
 		}
 	}		
 	

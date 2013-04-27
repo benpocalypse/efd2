@@ -175,7 +175,7 @@ void PLY_Move(signed char scX, signed char scY)
 
     if(objPlayer.objLocation.scSmallY <= MIN_SMALL_LOC)
     {
-        objPlayer.objLocation.ucBigY += 1U;
+        objPlayer.objLocation.ucBigY -= 1U;
         objPlayer.objLocation.scSmallY += TILE_SIZE;
         return;
     }

@@ -21,6 +21,12 @@ void GAME_Init(void)
 	//SetFontTilesIndex(EFD2_TILES_SIZE);
 }
 
+void GAME_ScreenPassed(void)
+{
+    LGC_Init();
+    LGC_Start();
+}
+
 void GAME_ManageGame(void)
 {
     LGC_ManageLogic();
