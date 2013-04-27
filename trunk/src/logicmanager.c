@@ -13,20 +13,14 @@
 
 // Player sprite related defines
 #define PLAYER_SPRITE       0U
-/*#define PLAYER_IDLE         0U
+#define PLAYER_IDLE         0U
 #define PLAYER_RUN1         1U
 #define PLAYER_RUN2         0U
 #define PLAYER_RUN3         2U
-#define PLAYER_RUN4         0U*/
-
-#define PLAYER_IDLE         10U
-#define PLAYER_RUN1         10U
-#define PLAYER_RUN2         10U
-#define PLAYER_RUN3         10U
-#define PLAYER_RUN4         10U
+#define PLAYER_RUN4         0U
 #define PLAYER_RUN_FRAMES   4U
 
-#define FRAME_COUNTER       9U
+#define FRAME_COUNTER       2U
 
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
@@ -78,12 +72,11 @@ void LGC_Init(void)
     // Now handle some sprite inits.
     SetSpritesTileTable(efd2_sprites);
     SetSpriteVisibility(true);
-    MapSprite2(PLAYER_SPRITE, hero_idle, 0);
-    //sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
-    //sprites[PLAYER_SPRITE].x = OFF_SCREEN;
-    //sprites[PLAYER_SPRITE].y = OFF_SCREEN;
-    //sprites[PLAYER_SPRITE].flags = 0U;
-    MoveSprite(PLAYER_SPRITE, 30, 30, 1, 1);
+   
+    sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
+    sprites[PLAYER_SPRITE].x = OFF_SCREEN;
+    sprites[PLAYER_SPRITE].y = OFF_SCREEN;
+    sprites[PLAYER_SPRITE].flags = 0U;
     
     // Now set up our player animation variables.
     ucPlayerRunFrame = 0U;
@@ -405,31 +398,30 @@ void ProcessUpdatePlayer(void)
     // If we're not moving, set our sprite to the idle state.
     if(PLY_GetDirection() == NO_DIR)
     {
-        //sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
+        sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
     }
     else
     {//...otherwise, we're running, so let's animate.
         // Here we just try to determine which way to flip the player sprite.
         if(PLY_GetDirection() == LEFT)
         {
-            //sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
+            sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
         }
 
         if(PLY_GetDirection() == RIGHT)
         {
-            //sprites[PLAYER_SPRITE].flags = 0;
+            sprites[PLAYER_SPRITE].flags = 0;
         }
 
         // If we're running, we just loop our running animations.
-        if(ucAnimDelay == 0)
+        // This is just used to ensure we only change animation frames every
+        // 150mS by delaying our animation updates.
+        if((ucAnimDelay++)%(FRAME_COUNTER) == 0)
         {
-            //sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
+            sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
         }
     }
-
-    // This is just used to ensure we only change animation frames every
-    // 150mS by delaying our animation updates.
-    (ucAnimDelay++)%(FRAME_COUNTER);
+    
     
     eRequestedState = ENEMY_LOGIC;
 }
@@ -514,9 +506,6 @@ void DrawPlayer(void)
 
     // Then put our player sprite where it is supposed to be, by offsetting it's
     // position the correct amount.
-    //sprites[PLAYER_SPRITE].x = (((objTempCoord.ucBigX + MAP_X_OFFSET)*TILE_SIZE) + objTempCoord.scSmallX);
-    //sprites[PLAYER_SPRITE].y = (((objTempCoord.ucBigY + MAP_Y_OFFSET)*TILE_SIZE) + objTempCoord.scSmallY);
-    
-    sprites[PLAYER_SPRITE].x = 60;
-        sprites[PLAYER_SPRITE].y = 60;
+    sprites[PLAYER_SPRITE].x = (((objTempCoord.ucBigX + MAP_X_OFFSET)*TILE_SIZE) + objTempCoord.scSmallX);
+    sprites[PLAYER_SPRITE].y = (((objTempCoord.ucBigY + MAP_Y_OFFSET)*TILE_SIZE) + objTempCoord.scSmallY);
 }

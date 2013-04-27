@@ -3,10 +3,5 @@
     <input file="sprites.png" type="png" tile-width="8" tile-height="8" />
     <output file="sprites.inc">
         <tiles var-name="efd2_sprites"/>
-    <maps pointers-size="8">
-        <map var-name="hero_idle" left="0" top="0" width="1" height="1"/>
-        <map var-name="hero_run1" left="1" top="0" width="1" height="1"/>
-        <map var-name="hero_run2" left="2" top="0" width="1" height="1"/>
-	</maps>	
     </output>
 </gfx-xform>
