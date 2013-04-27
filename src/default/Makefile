@@ -21,7 +21,7 @@ COMMON = -mmcu=$(MCU)
 
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
-CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DF_CPU=28636360UL -Os -fsigned-char -ffunction-sections -fno-inline 
+CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DF_CPU=28636360UL -Os -fsigned-char -ffunction-sections -fno-inline
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d 
 CFLAGS += $(KERNEL_OPTIONS)
 
@@ -46,7 +46,8 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 
 
 ## Objects that must be built in order to link
-OBJECTS = uzeboxVideoEngineCore.o  uzeboxCore.o uzeboxSoundEngine.o uzeboxSoundEngineCore.o uzeboxVideoEngine.o globals.o gamemanager.o map.o input.o $(GAME).o 
+OBJECTS = uzeboxVideoEngineCore.o  uzeboxCore.o uzeboxSoundEngine.o uzeboxSoundEngineCore.o uzeboxVideoEngine.o 
+OBJECTS += globals.o gamemanager.o logicmanager.o player.o map.o input.o $(GAME).o 
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS = 
@@ -79,6 +80,12 @@ globals.o: ../globals.c
 gamemanager.o: ../gamemanager.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 	
+logicmanager.o: ../logicmanager.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+
+player.o: ../player.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+		
 map.o: ../map.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 	

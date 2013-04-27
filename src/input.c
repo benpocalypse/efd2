@@ -57,3 +57,4 @@ unsigned char INPUT_GetButton(C_INPUT eButton)
         return (uiJoy == 0);
     }
 }
+

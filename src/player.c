@@ -1,10 +1,9 @@
 #include "player.h"
-#include "globals.h"
 
 
 // Player class specific defines
 #define MAX_SMALL_LOC   4
-#define MIN_SMALL_LOC   -4
+#define MIN_SMALL_LOC  -4
 
 // Holds our classes Player data internally.
 static PLAYER objPlayer;
@@ -33,14 +32,7 @@ unsigned char PLY_Init(void)
 ///****************************************************************************
 unsigned char PLY_IsCarrying(unsigned int uiItem)
 {
-    if((uiInv & uiItem) && uiItem) == TRUE)
-    {
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
+    return ((objPlayer.uiInventory & uiItem) && uiItem);
 }
 
 
@@ -119,7 +111,7 @@ void PLY_SetVelocity(unsigned char ucVel)
 
 unsigned char PLY_GetDirection(void)
 {
-    return objPlayer.ucVelocity & 0x0F;
+    return objPlayer.ucVelocityAndDirection & 0x0F;
 }
 
 
@@ -138,6 +130,10 @@ COORDINATE PLY_GetCoordinate(void)
     return objPlayer.objLocation;
 }
 
+
+///****************************************************************************
+/// Simple setter for the players current location.
+///****************************************************************************
 void PLY_SetCoordinate(COORDINATE objNewCoord)
 {
     objPlayer.objLocation.ucBigX = objNewCoord.ucBigX;

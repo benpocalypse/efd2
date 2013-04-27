@@ -1,7 +1,7 @@
 #include "map.h"
 #include "globals.h"
-#include "object.h"
 #include <stdbool.h>
+#include <uzebox.h>
 
 // Map compresipon size defines
 #define MODWIDTH	4U  // The number of tiles to be stored in a single unsigned char
@@ -12,8 +12,8 @@
 static unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
 
 // Our entry and exit door objects.
-static struct MapObject objEntrance;
-static struct MapObject objExit;
+static MapObject objEntrance;
+static MapObject objExit;
 
 // Private function prototypes
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
@@ -233,12 +233,14 @@ void MAP_GenerateMap(unsigned char ucRoomType)
 ///****************************************************************************
 void MAP_DrawMyMap(void)
 {
+    // Each time we draw a map, randomly pick one of the 3 types of floors
+    // to add a little variety to our maps.
     unsigned char ucFloor = RandomNum(1,3);
+    
 	for(unsigned char j = 0U; j < MAPHEIGHT; j++)
 	{
 		for(unsigned char i = 0U; i < MAPWIDTH; i++)
 		{
-		    
 		    unsigned char ucTile = MAP_TileIs(i,j);
 		    
 		    switch(ucTile)

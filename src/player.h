@@ -1,9 +1,10 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
+#include "globals.h"
 
 // All of the data related to the player is stored  here.
-typdef struct
+typedef struct
 {
     unsigned char ucHealth;
     unsigned char ucTotalHealth;
@@ -29,6 +30,6 @@ unsigned char PLY_GetDirection(void);
 void          PLY_SetDirection(unsigned char ucDir);
 COORDINATE    PLY_GetCoordinate(void);
 void          PLY_SetCoordinate(COORDINATE objNewCoord);
-void          PLY_Move(signed char ucX, signed char ucY);
+void          PLY_Move(signed char scX, signed char scY);
 
 #endif

@@ -1,4 +1,6 @@
 #include "globals.h"
+#include <stdlib.h>
+#include <math.h>
 
 ///****************************************************************************
 /// Generates random numbers starting at and including ucMin up to and 

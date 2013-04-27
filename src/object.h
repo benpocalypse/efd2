@@ -2,12 +2,12 @@
 #define _OBJECT_H_
 
 // Object type that holds a "thing" that will appear somewhere on the map.
-struct MapObject
+typedef struct
 {
 	unsigned char ucX;
 	unsigned char ucY;
 	unsigned char ucType;
-};
+} MapObject;
 
 #endif
 
