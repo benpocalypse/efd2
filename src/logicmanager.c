@@ -40,6 +40,8 @@ typedef enum
 // Private class variables
 static LOGIC_STATE eCurrentState;
 static LOGIC_STATE eRequestedState;
+
+// These variables are used to animate the player
 static unsigned char ucPlayerRunFrame;
 static unsigned char ucPlayerRun[PLAYER_RUN_FRAMES];
 static unsigned char bRunning;
@@ -65,11 +67,12 @@ static void DrawPlayer(void);
 ///****************************************************************************
 void LGC_Init(void)
 {
+    // Set up our FSM variables to known safe states
     eCurrentState = UNKNOWN;
     eRequestedState = INIT;
     bRunning = false;
     
-    // Now handle some sprite inits.
+    // Now handle some sprite inits
     SetSpritesTileTable(efd2_sprites);
     SetSpriteVisibility(true);
    
@@ -78,7 +81,7 @@ void LGC_Init(void)
     sprites[PLAYER_SPRITE].y = OFF_SCREEN;
     sprites[PLAYER_SPRITE].flags = 0U;
     
-    // Now set up our player animation variables.
+    // Now set up our player animation variables
     ucPlayerRunFrame = 0U;
     ucPlayerRun[0] = PLAYER_RUN1;
     ucPlayerRun[1] = PLAYER_RUN2;
@@ -92,9 +95,7 @@ void LGC_Init(void)
 /// processing any tasks that would happen inside any of the individual states.
 ///****************************************************************************
 void LGC_ManageLogic(void)
-{
-    //PrintByte(20,20,eCurrentState, false);
-    
+{   
     if(bRunning == true)
     {            
         // If we're supposed to switch states, take care of that here.
@@ -229,6 +230,12 @@ void ProcessInit(void)
 ///****************************************************************************
 void ProcessInput(void)
 {
+
+    // FIXME - Pressing diagonal directions currently just makes the player run
+    //         slowly. We need to handle this by just keeping them going in the
+    //         same direction they were, without allowing them to travel in a
+    //         diagonal direction.
+
     // If the player presses up...
     if(INPUT_GetButton(IN_UP) == true)
     {//...and we were going up before...
@@ -302,7 +309,7 @@ void ProcessInput(void)
     }
     
     // And finally, if the player isn't pushing anything,
-    // then stop moving!
+    // then coast to a stop slowly.
     if(INPUT_GetButton(IN_NONE) == true)
     {
         unsigned char ucVel = PLY_GetVelocity();
@@ -329,6 +336,12 @@ void ProcessInput(void)
 ///****************************************************************************
 void ProcessUpdatePlayer(void)
 {
+    // FIXME - This function needs to check both the X and Y directions whenever
+    //         moving in either direction. The problem is that the player can
+    //         essentially 'cheat' through a wall by moving in the wrong
+    //         direction while they're only partially inside the wall.
+
+
     // This keeps track of which frame of animation the player sprite
     // is currently using.
     static unsigned char ucFrameCount = 0U;
