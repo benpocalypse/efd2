@@ -52,12 +52,12 @@ void MAP_GenerateMap(unsigned char ucRoomType)
         unsigned char ucHeight = 0U;
         unsigned char ucHeight2 = 0U;
         
-        unsigned char ucRoomOnePosition = RandomNum(0,1);
-        unsigned char ucRoomTwoPosition = RandomNum(0,1);
+        unsigned char ucRoomOnePosition = GLB_RandomNum(0,1);
+        unsigned char ucRoomTwoPosition = GLB_RandomNum(0,1);
 
         // First, decide the room width/height.
-        ucWidth = RandomNum(9, 14);
-        ucHeight = RandomNum(10, 15);
+        ucWidth = GLB_RandomNum(9, 14);
+        ucHeight = GLB_RandomNum(10, 15);
         
         // Draw room 1 first.
         // Draw the left, right, top, and then bottom walls.
@@ -76,8 +76,8 @@ void MAP_GenerateMap(unsigned char ucRoomType)
 
         // Now draw room 2.     
         // First, decide the room width/height.
-        ucWidth2 = RandomNum(6, 21-ucWidth);
-        ucHeight2 = RandomNum(9, 16);
+        ucWidth2 = GLB_RandomNum(6, 21-ucWidth);
+        ucHeight2 = GLB_RandomNum(9, 16);
 
         // Draw the left, right, top, and then bottom walls.
         DrawLine(MAPWIDTH-ucWidth2, (ucRoomTwoPosition*(MAPHEIGHT-ucHeight2)),
@@ -151,9 +151,9 @@ void MAP_GenerateMap(unsigned char ucRoomType)
     // One big room, with multiple obstacles.
     if(ucRoomType == 1U)
     {
-        unsigned char ucWidth = RandomNum(18, MAPWIDTH-1);
-        unsigned char ucHeight = RandomNum(14, MAPHEIGHT-1);
-        unsigned char ucDoor = RandomNum(UP, RIGHT);
+        unsigned char ucWidth = GLB_RandomNum(18, MAPWIDTH-1);
+        unsigned char ucHeight = GLB_RandomNum(14, MAPHEIGHT-1);
+        unsigned char ucDoor = GLB_RandomNum(UP, RIGHT);
         
         // Draw the walls.
         DrawLine((MAPWIDTH/2) - (ucWidth/2), (MAPHEIGHT/2) - (ucHeight/2), 
@@ -169,11 +169,11 @@ void MAP_GenerateMap(unsigned char ucRoomType)
         FloodFill(MAPWIDTH/2,MAPHEIGHT/2, MT_FLOOR);
 
         // And add the doors.
-        unsigned char ucDoor2 = RandomNum(UP,RIGHT);
+        unsigned char ucDoor2 = GLB_RandomNum(UP,RIGHT);
         
         while(ucDoor == ucDoor2)
         {
-            ucDoor2 = RandomNum(UP, RIGHT);
+            ucDoor2 = GLB_RandomNum(UP, RIGHT);
         }
         
         AddDoor(ucDoor, true);
@@ -183,9 +183,9 @@ void MAP_GenerateMap(unsigned char ucRoomType)
     // A long skinny room, with doors at opposite ends.
     if(ucRoomType == 2U)
     {
-        if(RandomNum(0,1) == 0)
+        if(GLB_RandomNum(0,1) == 0)
         {            
-            unsigned char ucHeight = RandomNum(8, 11);
+            unsigned char ucHeight = GLB_RandomNum(8, 11);
             // Draw the walls.
             DrawLine(0, (MAPHEIGHT/2) - (ucHeight/2), 
                      0, (MAPHEIGHT/2) + (ucHeight/2), MT_WALL_TOP);
@@ -205,7 +205,7 @@ void MAP_GenerateMap(unsigned char ucRoomType)
         }
         else
         {
-            unsigned char ucWidth = RandomNum(8, 11);
+            unsigned char ucWidth = GLB_RandomNum(8, 11);
             // Draw the walls.
             DrawLine((MAPWIDTH/2) - (ucWidth/2), 0,
                      (MAPWIDTH/2) - (ucWidth/2), MAPHEIGHT-2, MT_WALL_TOP);
@@ -235,7 +235,7 @@ void MAP_DrawMyMap(void)
 {
     // Each time we draw a map, randomly pick one of the 3 types of floors
     // to add a little variety to our maps.
-    unsigned char ucFloor = RandomNum(1,3);
+    unsigned char ucFloor = GLB_RandomNum(1,3);
     
 	for(unsigned char j = 0U; j < MAPHEIGHT; j++)
 	{
@@ -279,7 +279,7 @@ void MAP_DrawObjects(void)
 ///****************************************************************************
 MapObject MAP_GetDoor(unsigned char bEntrance)
 {
-    if(bEntrance == true)
+    if(bEntrance == MT_ENTRANCE)
     {
         return objEntrance;
     }
@@ -471,13 +471,13 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
                 {
                     if(bEntrance == true)
                     {
-                        objEntrance.ucX = i+RandomNum(3, 7);
+                        objEntrance.ucX = i+GLB_RandomNum(3, 7);
                         objEntrance.ucY = j;
                         objEntrance.ucType = DOOR;
                     }
                     else
                     {
-                        objExit.ucX = i+RandomNum(3,7);
+                        objExit.ucX = i+GLB_RandomNum(3,7);
                         objExit.ucY = j;
                         objExit.ucType = DOOR;
                     }
@@ -500,13 +500,13 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
                 {
                     if(bEntrance == true)
                     {
-                        objEntrance.ucX = i-RandomNum(1,4);
+                        objEntrance.ucX = i-GLB_RandomNum(1,4);
                         objEntrance.ucY = j;
                         objEntrance.ucType = DOOR;
                     }
                     else
                     {
-                        objExit.ucX = i-RandomNum(1,4);
+                        objExit.ucX = i-GLB_RandomNum(1,4);
                         objExit.ucY = j;
                         objExit.ucType = DOOR;
                     }
@@ -530,13 +530,13 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
                     if(bEntrance == true)
                     {
                         objEntrance.ucX = i;
-                        objEntrance.ucY = j-RandomNum(3,6);
+                        objEntrance.ucY = j-GLB_RandomNum(3,6);
                         objEntrance.ucType = DOOR;
                     }
                     else
                     {
                         objExit.ucX = i;
-                        objExit.ucY = j-RandomNum(3,6);
+                        objExit.ucY = j-GLB_RandomNum(3,6);
                         objExit.ucType = DOOR;
                     }
                     
@@ -559,13 +559,13 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
                     if(bEntrance == true)
                     {
                         objEntrance.ucX = i;
-                        objEntrance.ucY = j-RandomNum(2,4);
+                        objEntrance.ucY = j-GLB_RandomNum(2,4);
                         objEntrance.ucType = DOOR;
                     }
                     else
                     {
                         objExit.ucX = i;
-                        objExit.ucY = j-RandomNum(2,4);
+                        objExit.ucY = j-GLB_RandomNum(2,4);
                         objExit.ucType = DOOR;
                     }
                 
@@ -575,3 +575,4 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
         }
     }
 }
+

@@ -9,7 +9,7 @@
 #include <uzebox.h>
 
 // Allows the Logic Manager class to access our sprite tiles
-#include "data/sprites.inc"
+//#include "data/sprites.inc"
 
 // Player sprite related defines
 #define PLAYER_SPRITE       0U
@@ -20,7 +20,8 @@
 #define PLAYER_RUN4         0U
 #define PLAYER_RUN_FRAMES   4U
 
-#define FRAME_COUNTER       2U
+// This just defines how long we delay on each frame to achieve smooth animation
+#define FRAME_COUNTER       3U
 
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
@@ -45,6 +46,7 @@ static LOGIC_STATE eRequestedState;
 static unsigned char ucPlayerRunFrame;
 static unsigned char ucPlayerRun[PLAYER_RUN_FRAMES];
 static unsigned char bRunning;
+static unsigned char bExitReached;
 
 
 // Private class functions
@@ -71,10 +73,11 @@ void LGC_Init(void)
     eCurrentState = UNKNOWN;
     eRequestedState = INIT;
     bRunning = false;
+    bExitReached = false;
     
     // Now handle some sprite inits
-    SetSpritesTileTable(efd2_sprites);
-    SetSpriteVisibility(true);
+    //SetSpritesTileTable(efd2_sprites);
+    //SetSpriteVisibility(true);
    
     sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
     sprites[PLAYER_SPRITE].x = OFF_SCREEN;
@@ -138,6 +141,10 @@ void LGC_ManageLogic(void)
     }
 }
 
+unsigned char LGC_ExitReached(void)
+{
+    return bExitReached;
+}
 
 void LGC_Start(void)
 {
@@ -189,6 +196,7 @@ void ModeEntry(LOGIC_STATE eState)
     switch(eState)
     {
         case INIT:
+            bExitReached = false;
             break;
         
         case PROCESS_INPUT:
@@ -336,162 +344,118 @@ void ProcessInput(void)
 ///****************************************************************************
 void ProcessUpdatePlayer(void)
 {
-    // FIXME - This function needs to check both the X and Y directions whenever
-    //         moving in either direction. The problem is that the player can
-    //         essentially 'cheat' through a wall by moving in the wrong
-    //         direction while they're only partially inside the wall.
+    COORDINATE objCurrentCoord = PLY_GetCoordinate();
+    COORDINATE objNewCoord = PLY_GetCoordinate();
+    
+    MapObject objExitDoor = MAP_GetDoor(MT_EXIT);
 
-
-    // This keeps track of which frame of animation the player sprite
-    // is currently using.
-    static unsigned char ucFrameCount = 0U;
-    static unsigned char ucAnimDelay = 0U;
-
-    // First, check to see if we can move the requested amount, in the requested direction...
+    // Move our new coord right
     if(PLY_GetDirection() == RIGHT)
     {
-        COORDINATE objTempCoord = PLY_GetCoordinate();
-
-        // If the tile to our right is open, then we can move right.
-        if(MAP_TileIs(objTempCoord.ucBigX+1, objTempCoord.ucBigY) == MT_FLOOR)
-        {
-            PLY_Move(PLY_GetVelocity(), 0);
-        }
-        else
-        {
-            // We've crossed into a wall, so move the player back to even.
-            if(objTempCoord.scSmallX > 0)
-            {
-                PLY_Move(-objTempCoord.scSmallX, 0);
-            }
-            else
-            {// otherwise, we ran into something, so stop moving.
-                PLY_SetDirection(NO_DIR);
-                PLY_SetVelocity(0U);
-            }
-        }
+        objNewCoord = GLB_MoveCoordinate(objCurrentCoord, PLY_GetVelocity(), 0);
     }
-
-    // First, check to see if we can move the requested amount, in the requested direction...
+    
+    // Move our new coord left.
     if(PLY_GetDirection() == LEFT)
     {
-        COORDINATE objTempCoord = PLY_GetCoordinate();
-
-        // If the tile to our left is open, then we can move left.
-        if(MAP_TileIs(objTempCoord.ucBigX-1, objTempCoord.ucBigY) == MT_FLOOR)
-        {
-            PLY_Move(-PLY_GetVelocity(), 0);
-        }
-        else
-        {            
-            // We're next to a wall, so only move until we run into it...
-            if(objTempCoord.scSmallX > 0)
-            {
-                // Now decide if we can move at full speed, or have to slow down.
-                if(objTempCoord.scSmallX >= PLY_GetVelocity())
-                {
-                    PLY_Move(-PLY_GetVelocity(), 0);
-                }
-                else
-                {
-                    PLY_Move(-1, 0);
-                }
-            }
-            else
-            {// otherwise, we ran into something, so stop moving.
-                PLY_SetDirection(NO_DIR);
-                PLY_SetVelocity(0U);
-            }
-        }
+        objNewCoord = GLB_MoveCoordinate(objCurrentCoord, -PLY_GetVelocity(), 0);
     }
 
-    // First, check to see if we can move the requested amount, in the requested direction...
+    // Move our new coord up.
     if(PLY_GetDirection() == UP)
     {
-        COORDINATE objTempCoord = PLY_GetCoordinate();
-
-        // If the tile to our north is open, then we can move north.
-        if(MAP_TileIs(objTempCoord.ucBigX, objTempCoord.ucBigY-1) == MT_FLOOR)
-        {
-            PLY_Move(0, -PLY_GetVelocity());
-        }
-        else
-        {
-            // We're next to a wall, so only move until we run into it...
-            if(objTempCoord.scSmallY > 0)
-            {
-                // Now decide if we can move at full speed, or have to slow down.
-                if(objTempCoord.scSmallY >= PLY_GetVelocity())
-                {
-                    PLY_Move(0, -PLY_GetVelocity());
-                }
-                else
-                {
-                    PLY_Move(0, -1);
-                }
-            }
-            else
-            {// otherwise, we ran into something, so stop moving.
-                PLY_SetDirection(NO_DIR);
-                PLY_SetVelocity(0U);
-            }
-        }
+        objNewCoord = GLB_MoveCoordinate(objCurrentCoord, 0, -PLY_GetVelocity());
     }
 
-    // First, check to see if we can move the requested amount, in the requested direction...
+    // Move our new coord down.
     if(PLY_GetDirection() == DOWN)
     {
-        COORDINATE objTempCoord = PLY_GetCoordinate();
-
-        // If the tile to our south is open, then we can move south.
-        if(MAP_TileIs(objTempCoord.ucBigX, objTempCoord.ucBigY+1) == MT_FLOOR)
-        {
-            PLY_Move(0, PLY_GetVelocity());
-        }
-        else
-        {
-            // We've crossed into a wall, so move the player back to even.
-            if(objTempCoord.scSmallY > 0)
-            {
-                PLY_Move(0, -objTempCoord.scSmallY);
-            }
-            else
-            {// otherwise, we ran into something, so stop moving.
-                PLY_SetDirection(NO_DIR);
-                PLY_SetVelocity(0U);
-            }
-        }
+        objNewCoord = GLB_MoveCoordinate(objCurrentCoord, 0, PLY_GetVelocity());
     }
-
-
-    // If we're not moving, set our sprite to the idle state.
-    if(PLY_GetDirection() == NO_DIR)
+    
+    
+    // Before we check for collisions, let's see if the player is at the exit door.
+    if((objNewCoord.ucBigX == objExitDoor.ucX) && (objNewCoord.ucBigY == objExitDoor.ucY))
     {
-        sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
-    }
-    else
-    {//...otherwise, we're running, so let's animate.
-        // Here we just try to determine which way to flip the player sprite.
-        if(PLY_GetDirection() == LEFT)
-        {
-            sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
-        }
-
-        if(PLY_GetDirection() == RIGHT)
-        {
-            sprites[PLAYER_SPRITE].flags = 0;
-        }
-
-        // If we're running, we just loop our running animations.
-        // This is just used to ensure we only change animation frames every
-        // 150mS by delaying our animation updates.
-        if((ucAnimDelay++)%(FRAME_COUNTER) == 0)
-        {
-            sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
-        }
+        bExitReached = true;
+        return;
     }
     
     
+    // Now, we look at our new coord, and decide if it's inside a wall. If it is,
+    // then we move it back outside the wall, and stop the player.
+     
+    // First check left.
+    if(MAP_TileIs(objCurrentCoord.ucBigX-1, objCurrentCoord.ucBigY) != MT_FLOOR)
+    {
+        // If we've moved into a wall, then fix our location and stop us.
+        if(objNewCoord.ucBigX == (objCurrentCoord.ucBigX-1))
+        {
+            objNewCoord.ucBigX++;
+            objNewCoord.scSmallX = 0;
+            
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+    
+    // Now check right.
+    if(MAP_TileIs(objCurrentCoord.ucBigX+1, objCurrentCoord.ucBigY) != MT_FLOOR)
+    {
+        // If we've moved into a wall, then fix our location and stop us.
+        if((objNewCoord.ucBigX == objCurrentCoord.ucBigX) && (objNewCoord.scSmallX > 0))
+        {
+            objNewCoord.scSmallX = 0;
+            
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+    
+    // Now check up.
+    if(MAP_TileIs(objCurrentCoord.ucBigX, objCurrentCoord.ucBigY-1) != MT_FLOOR)
+    {
+        // If we've moved into a wall, then fix our location and stop us.
+        if(objNewCoord.ucBigY == (objCurrentCoord.ucBigY-1))
+        {
+            objNewCoord.ucBigY++;
+            objNewCoord.scSmallY = 0;
+            
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+    
+    // Now check down.
+    if(MAP_TileIs(objCurrentCoord.ucBigX, objCurrentCoord.ucBigY+1) != MT_FLOOR)
+    {
+        // If we've moved into a wall, then fix our location and stop us.
+        if((objNewCoord.ucBigY == objCurrentCoord.ucBigY) && (objNewCoord.scSmallY > 0))
+        {
+            objNewCoord.scSmallY = 0;
+            
+            PLY_SetDirection(NO_DIR);
+            PLY_SetVelocity(0U);
+        }
+    }
+    
+    // And finally, update our player location    
+    PLY_SetCoordinate(objNewCoord);
+    
+/*    Print(1,1,PSTR("bX:"));
+    Print(1,2,PSTR("bY:"));
+    Print(1,3,PSTR("sX:"));
+    Print(1,4,PSTR("sY:"));
+    
+
+    PrintByte(5, 1, objNewCoord.ucBigX, true);
+    PrintByte(5, 2, objNewCoord.ucBigY, true);
+    PrintByte(5, 3, objNewCoord.scSmallX, true);
+    PrintByte(5, 4, objNewCoord.scSmallY, true);  
+    PrintByte(5, 5, objExitDoor.ucX, true);
+    PrintByte(5, 6, objExitDoor.ucY, true);
+*/    
+    // Move to our next state.
     eRequestedState = ENEMY_LOGIC;
 }
 
@@ -506,6 +470,8 @@ void ProcessEnemyLogic(void)
 // FIXME - Implement functionality
 void ProcessCollisions(void)
 {
+    
+
     eRequestedState = PROCESS_INPUT;
 }
 
@@ -565,10 +531,15 @@ COORDINATE SetPlayerStartLocation(void)
 
 ///****************************************************************************
 /// All this helper function does is update the Player's sprite to the 
-/// appropriate X/Y location on the screen, to reduce function clutter.
+/// appropriate X/Y location on the screen, to reduce function clutter. It
+/// also handles animation in the case of the player running.
 ///****************************************************************************
 void DrawPlayer(void)
 {
+    // This keeps track of which frame of animation the player sprite
+    // is currently using.
+    static unsigned char ucAnimDelay = 0U;
+
     // First get our players coordinate within the map (which is going to be 
     // centered in the middle of the screen.)
     COORDINATE objTempCoord = PLY_GetCoordinate();
@@ -577,4 +548,31 @@ void DrawPlayer(void)
     // position the correct amount.
     sprites[PLAYER_SPRITE].x = (((objTempCoord.ucBigX + MAP_X_OFFSET)*TILE_SIZE) + objTempCoord.scSmallX);
     sprites[PLAYER_SPRITE].y = (((objTempCoord.ucBigY + MAP_Y_OFFSET)*TILE_SIZE) + objTempCoord.scSmallY);
+    
+    // If we're not moving, set our sprite to the idle state.
+    if(PLY_GetDirection() == NO_DIR)
+    {
+        sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
+    }
+    else
+    {//...otherwise, we're running, so let's animate.
+        // Here we just try to determine which way to flip the player sprite.
+        if(PLY_GetDirection() == LEFT)
+        {
+            sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
+        }
+
+        if(PLY_GetDirection() == RIGHT)
+        {
+            sprites[PLAYER_SPRITE].flags = 0;
+        }
+
+        // If we're running, we just loop our running animations.
+        // This is just used to ensure we only change animation frames every
+        // 150mS by delaying our animation updates.
+        if((ucAnimDelay++)%(FRAME_COUNTER) == 0)
+        {
+            sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
+        }
+    }
 }

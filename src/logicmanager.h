@@ -3,6 +3,7 @@
 
 void LGC_Init(void);
 void LGC_ManageLogic(void);
+unsigned char LGC_ExitReached(void);
 void LGC_Start(void);
 void LGC_Stop(void);
 

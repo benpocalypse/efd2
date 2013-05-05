@@ -27,7 +27,7 @@
 #include <uzebox.h>
 
 #include "gamemanager.h"
-#include "map.h"
+//#include "map.h"
 #include "input.h"
 #include "globals.h"
 
@@ -49,26 +49,27 @@ int main()
 	ClearVram();
 	
 	GAME_Init();
-    GAME_DrawHud();       
-    
-    MAP_InitializeMap();
-	MAP_GenerateMap(RandomNum(0,2));
-	MAP_DrawMyMap();
-	MAP_DrawObjects();
 
+    GAME_DrawTitleScreen();
+    while(INPUT_GetButton(IN_START) != true)
+    {
+        ucTime++;
+    }
+	
+	srand((unsigned)ucTime);
+	GAME_DrawHud();
 	
 	while(1)
-	{
-	    ucTime++;
+	{	    
 		WaitVsync(1);
         GAME_ManageGame();
 
 		if(INPUT_GetButton(IN_START) == true)
 		{
-    		srand((unsigned)ucTime);
+    		
 		    MAP_InitializeMap();
    	        MAP_DrawMyMap();   	        
-	        MAP_GenerateMap(RandomNum(0,2));
+	        MAP_GenerateMap(GLB_RandomNum(0,2));
 	        MAP_DrawMyMap();
 	        MAP_DrawObjects();
 	        GAME_ScreenPassed();
