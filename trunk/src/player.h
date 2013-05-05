@@ -30,6 +30,5 @@ unsigned char PLY_GetDirection(void);
 void          PLY_SetDirection(unsigned char ucDir);
 COORDINATE    PLY_GetCoordinate(void);
 void          PLY_SetCoordinate(COORDINATE objNewCoord);
-void          PLY_Move(signed char scX, signed char scY);
 
 #endif

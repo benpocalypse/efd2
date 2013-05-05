@@ -1,6 +1,10 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
+//#include "data/tileset.inc"
+//#include "data/sprites.inc"
+//#include "data/font.inc"
+
 // Item related defines, a total of 16 in game items.
 #define HEALTH_POTION     0x0001
 #define HASTE_POTION      0x0002
@@ -52,10 +56,6 @@
 #define RIGHT	3U
 #define NO_DIR  4U
 
-// Functions that are used universally
-unsigned char RandomNum(unsigned char ucMin, unsigned char ucMax);
-
-
 // Holds the X/Y coordinates of a player, enemy, or other object that
 // need's pixel perfect accuracy
 typedef struct
@@ -65,5 +65,10 @@ typedef struct
     signed char scSmallX;
     signed char scSmallY;
 } COORDINATE;
+
+// Functions that are used universally
+unsigned char GLB_RandomNum(unsigned char ucMin, unsigned char ucMax);
+COORDINATE GLB_MoveCoordinate(COORDINATE coord, signed char scX, signed char scY);
+
 
 #endif

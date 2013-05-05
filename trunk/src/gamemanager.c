@@ -5,20 +5,28 @@
 #include <uzebox.h>
 
 // Include our tile data
+//#include "data/font-8x8-full.inc"
+#include "data/font.inc"
 #include "data/tileset.inc"
-#include "data/font8x8.pic.inc"
+
+//#include "data/font.inc"
+//#include "data/fonts_8x8.pic.inc"
+
+#include "data/sprites.inc"
+//#include "data/font.inc"
 
 
 
 void GAME_Init(void)
 {
-    SetTileTable(efd2_tiles);
     ClearVram();
     SetFontTilesIndex(EFD2_TILES_SIZE);
+    SetTileTable(efd2_tiles);
+    SetSpritesTileTable(efd2_sprites);
+    SetSpriteVisibility(true);
     LGC_Init();
     LGC_Start();
     //SetSpriteVisibility(false);
-	//SetFontTilesIndex(EFD2_TILES_SIZE);
 }
 
 void GAME_ScreenPassed(void)
@@ -30,6 +38,15 @@ void GAME_ScreenPassed(void)
 void GAME_ManageGame(void)
 {
     LGC_ManageLogic();
+    
+    if(LGC_ExitReached() == true)
+    {
+        GAME_ScreenPassed();
+        MAP_InitializeMap();
+	    MAP_GenerateMap(GLB_RandomNum(0,2));
+	    MAP_DrawMyMap();
+	    MAP_DrawObjects();	    
+    }
     //SetSpriteVisibility(true);    
 }
 
@@ -70,5 +87,10 @@ void GAME_DrawHud(void)
     
     // And now the hero portrait.
     DrawMap2(26,1, hero_portrait);
+}
+
+void GAME_DrawTitleScreen(void)
+{
+    DrawMap2(12,13, title);
 }
 

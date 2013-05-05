@@ -7,11 +7,15 @@
 #define MAPWIDTH	24U // The actual width of the map
 #define MAPHEIGHT	18U // The actual height of the map
 
-// Internally defined storage for our 4 tiles
+// Defined storage for our 4 tiles
 #define MT_EMPTY    0U
 #define MT_FLOOR    1U
 #define MT_WALL_TOP 2U
 #define MT_WALL_MID 3U
+
+// Defines for our door
+#define MT_EXIT     0U
+#define MT_ENTRANCE 1U
 
 // Public Map Class functions
 void MAP_InitializeMap(void);

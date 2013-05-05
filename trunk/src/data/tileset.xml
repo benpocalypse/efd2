@@ -6,6 +6,7 @@
     <maps pointers-size="8"> 
         <map var-name="hero_portrait" left="5" top="4" width="3" height="3"/>
         <map var-name="creative_commons" left="3" top="7" width="5" height="1"/>
+        <map var-name="title" left="3" top="2" width="5" height="2"/>
 	</maps>	
     </output>
 </gfx-xform>
