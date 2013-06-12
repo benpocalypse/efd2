@@ -74,10 +74,6 @@ void LGC_Init(void)
     eRequestedState = INIT;
     bRunning = false;
     bExitReached = false;
-    
-    // Now handle some sprite inits
-    //SetSpritesTileTable(efd2_sprites);
-    //SetSpriteVisibility(true);
    
     sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
     sprites[PLAYER_SPRITE].x = OFF_SCREEN;
@@ -373,14 +369,13 @@ void ProcessUpdatePlayer(void)
         objNewCoord = GLB_MoveCoordinate(objCurrentCoord, 0, PLY_GetVelocity());
     }
     
-    
-    // Before we check for collisions, let's see if the player is at the exit door.
-    if((objNewCoord.ucBigX == objExitDoor.ucX) && (objNewCoord.ucBigY == objExitDoor.ucY))
+    // Now, before we "correct" the movement based on collisions, let's check to
+    // see if the player has reached the exit door.
+    if(GLB_CoordinateToObjectCollision(objNewCoord, objExitDoor) == true)
     {
         bExitReached = true;
         return;
-    }
-    
+    }    
     
     // Now, we look at our new coord, and decide if it's inside a wall. If it is,
     // then we move it back outside the wall, and stop the player.
@@ -441,20 +436,7 @@ void ProcessUpdatePlayer(void)
     
     // And finally, update our player location    
     PLY_SetCoordinate(objNewCoord);
-    
-/*    Print(1,1,PSTR("bX:"));
-    Print(1,2,PSTR("bY:"));
-    Print(1,3,PSTR("sX:"));
-    Print(1,4,PSTR("sY:"));
-    
-
-    PrintByte(5, 1, objNewCoord.ucBigX, true);
-    PrintByte(5, 2, objNewCoord.ucBigY, true);
-    PrintByte(5, 3, objNewCoord.scSmallX, true);
-    PrintByte(5, 4, objNewCoord.scSmallY, true);  
-    PrintByte(5, 5, objExitDoor.ucX, true);
-    PrintByte(5, 6, objExitDoor.ucY, true);
-*/    
+        
     // Move to our next state.
     eRequestedState = ENEMY_LOGIC;
 }

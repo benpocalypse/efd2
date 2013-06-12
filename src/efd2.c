@@ -56,7 +56,11 @@ int main()
         ucTime++;
     }
 	
+	// We seed our random number here, because it relies on the randomness of
+	// the player pressing start after they've been to the title screen.
 	srand((unsigned)ucTime);
+	
+	GAME_DrawBlankScreen();
 	GAME_DrawHud();
 	
 	while(1)
@@ -64,6 +68,7 @@ int main()
 		WaitVsync(1);
         GAME_ManageGame();
 
+        // FIXME - This is here just in case you get stuck.
 		if(INPUT_GetButton(IN_START) == true)
 		{
     		
@@ -74,6 +79,7 @@ int main()
 	        MAP_DrawObjects();
 	        GAME_ScreenPassed();
 		}
+		
 	}		
 	
 }

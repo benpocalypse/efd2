@@ -1,5 +1,17 @@
 #include "player.h"
 
+// All of the data related to the player is stored  here.
+typedef struct
+{
+    unsigned char ucHealth;
+    unsigned char ucTotalHealth;
+    unsigned char ucGold;
+    unsigned int  uiInventory; // BITFIELD...MASKABLE, ORABLE(16 items total)
+    unsigned char ucScreensPassed;
+    unsigned char ucVelocityAndDirection;
+    COORDINATE    objLocation;
+} PLAYER;
+
 // Holds our classes Player data internally.
 static PLAYER objPlayer;
 
@@ -20,6 +32,7 @@ unsigned char PLY_Init(void)
     objPlayer.objLocation.scSmallX = 0;
     objPlayer.objLocation.scSmallY = 0;
 }
+
 
 ///****************************************************************************
 /// Checks to see if the player currently has an item in their inventory, by
@@ -82,6 +95,24 @@ void PLY_PassedScreen(void)
     objPlayer.ucScreensPassed++;
 }
 
+
+///****************************************************************************
+/// Simple getter for the current Player Health.
+///****************************************************************************
+unsigned char PLY_GetHealth(void)
+{
+    objPlayer.ucHealth;
+}
+
+///****************************************************************************
+/// Simple getter for the Total Player Health.
+///****************************************************************************
+unsigned char PLY_GetTotalHealth(void)
+{
+    return objPlayer.ucTotalHealth;
+}
+
+
 ///****************************************************************************
 /// Simple getter for the number of screens passed.
 ///****************************************************************************
@@ -91,12 +122,20 @@ unsigned char PLY_GetScreensPassed(void)
 }
 
 
+///****************************************************************************
+/// Getter for the Player's velocity that gets the value from a single 8 bit
+/// variable along with the players direction.
+///****************************************************************************
 unsigned char PLY_GetVelocity(void)
 {
     return ((objPlayer.ucVelocityAndDirection & 0xF0) >> 4);
 }
 
 
+///****************************************************************************
+/// Setter for the Player's velocity that stores the value in a single 8 bit
+/// variable along with the players direction.
+///****************************************************************************
 void PLY_SetVelocity(unsigned char ucVel)
 {
     objPlayer.ucVelocityAndDirection &= 0x0F;
@@ -104,12 +143,20 @@ void PLY_SetVelocity(unsigned char ucVel)
 }
 
 
+///****************************************************************************
+/// Getter for the Player's direction that gets the value from a single 8 bit
+/// variable along with the players velocity.
+///****************************************************************************
 unsigned char PLY_GetDirection(void)
 {
     return objPlayer.ucVelocityAndDirection & 0x0F;
 }
 
 
+///****************************************************************************
+/// Setter for the Player's direction that stores the value in a single 8 bit
+/// variable along with the players velocity.
+///****************************************************************************
 void PLY_SetDirection(unsigned char ucDir)
 {
     objPlayer.ucVelocityAndDirection &= 0xF0;

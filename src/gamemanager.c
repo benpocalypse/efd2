@@ -1,96 +1,274 @@
 #include "gamemanager.h"
 #include "globals.h"
 #include "logicmanager.h"
+#include "player.h"
 #include <avr/pgmspace.h>
 #include <uzebox.h>
 
 // Include our tile data
-//#include "data/font-8x8-full.inc"
-#include "data/font.inc"
 #include "data/tileset.inc"
-
-//#include "data/font.inc"
-//#include "data/fonts_8x8.pic.inc"
-
 #include "data/sprites.inc"
-//#include "data/font.inc"
 
+
+// Strings for our game to be printed.
+const char cLife[] PROGMEM = "Life:";
+const char cKeys[] PROGMEM = "Keys:";
+const char cGold[] PROGMEM = "Gold:";
+const char cPressStart[] PROGMEM = "Press Start!";
+const char cTitle[] PROGMEM = "Escape From";
+const char cBensoft[] PROGMEM = ";2013 Bentricity";
+const char cTiles[] PROGMEM = "Oryx Lo-Fi, oryxdesignlab.com";
+const char cEnding1[] PROGMEM = "Sorry this game is incomplete.";
+const char cEnding2[] PROGMEM = "Thanks for playing!";
+
+typedef enum
+{
+    GAME_INIT,
+    GAME_TITLESCREEN,
+    GAME_CUTSCENE,
+    GAME_PLAYLEVEL,
+    GAME_GAMEOVER,
+    GAME_UKNOWN
+} GAME_STATE;
+
+// Internal function prototypes
+void GAMEi_DrawStaticHUD(void);
+
+void GAMEi_ShowCredits(void);
 
 
 void GAME_Init(void)
 {
     ClearVram();
-    SetFontTilesIndex(EFD2_TILES_SIZE);
     SetTileTable(efd2_tiles);
     SetSpritesTileTable(efd2_sprites);
     SetSpriteVisibility(true);
     LGC_Init();
     LGC_Start();
+    PLY_Init();
     //SetSpriteVisibility(false);
 }
+
+
+void GAME_DrawBlankScreen(void)
+{
+    Fill(0,0, 30, 28, 0);
+}
+
 
 void GAME_ScreenPassed(void)
 {
     LGC_Init();
     LGC_Start();
+    PLY_PassedScreen();
 }
+
 
 void GAME_ManageGame(void)
 {
-    LGC_ManageLogic();
-    
-    if(LGC_ExitReached() == true)
+    if(PLY_GetScreensPassed() == 5)
     {
-        GAME_ScreenPassed();
-        MAP_InitializeMap();
-	    MAP_GenerateMap(GLB_RandomNum(0,2));
-	    MAP_DrawMyMap();
-	    MAP_DrawObjects();	    
+        GAMEi_ShowCredits();
+    }
+    else
+    {
+        LGC_ManageLogic();
+    
+        if(LGC_ExitReached() == true)
+        {
+            GAME_ScreenPassed();
+            MAP_InitializeMap();
+	        MAP_GenerateMap(GLB_RandomNum(0,2));
+	        MAP_DrawMyMap();
+	        MAP_DrawObjects();	    
+        }
     }
     //SetSpriteVisibility(true);    
 }
 
 void GAME_DrawHud(void)
 {
-    // Draw the vertical lines.
-    for(unsigned char i=1;i<28;i++)
+    // Draw HUD text
+    GLB_PrintString(2, 2, cLife); 
+    GLB_PrintString(2, 3, cKeys);
+    GLB_PrintString(2, 4, cGold);
+    
+    // Draw player hearts.
+    for(unsigned char i = 0; i < PLY_GetTotalHealth(); i++)
     {
-        SetTile(0,i,HUD_VERT);
+        if(i <= PLY_GetHealth())
+        {
+            SetTile(7+i, 2, 43);
+        }
+        else
+        {
+            SetTile(7+i, 2+i, 44);
+        }
+    }
+
+
+    GAMEi_DrawStaticHUD();
+}
+
+
+///****************************************************************************
+/// This function draws the part of the HUD that are static and down't change
+/// include the border, and player portrait.
+///****************************************************************************
+void GAMEi_DrawStaticHUD(void)
+{
+    // Draw the vertical lines.
+    for(unsigned char i=2;i<27;i++)
+    {
+        SetTile(1,i,HUD_VERT);
     }
         
-    for(unsigned char i=1;i<28;i++)
+    for(unsigned char i=2;i<27;i++)
     {
-        SetTile(29,i,HUD_VERT);
+        SetTile(27,i,HUD_VERT);
     }
     
     // Now draw the corners.
-    SetTile(0,0, HUD_CORNER);
-    SetTile(29,0, HUD_CORNER);
-    SetTile(0,4, HUD_CORNER);
-    SetTile(29,4, HUD_CORNER);
-    SetTile(0,27, HUD_CORNER);
-    SetTile(29,27, HUD_CORNER);
+    SetTile(1,  1, HUD_CORNER);
+    SetTile(27, 1, HUD_CORNER);
+    SetTile(1,  5, HUD_CORNER);
+    SetTile(27, 5, HUD_CORNER);
+    SetTile(1, 26, HUD_CORNER);
+    SetTile(27,26, HUD_CORNER);
     
     // Draw the horizontal lines.
-    for(unsigned char i=1;i<29;i++)
+    for(unsigned char i=2;i<27;i++)
     {
-        SetTile(i,0,HUD_HORIZ);
+        SetTile(i,1,HUD_HORIZ);
     }    
-    for(unsigned char i=1;i<29;i++)
+    for(unsigned char i=2;i<27;i++)
     {
-        SetTile(i,4,HUD_HORIZ);
+        SetTile(i,5,HUD_HORIZ);
     }
-    for(unsigned char i=1;i<29;i++)
+    for(unsigned char i=2;i<27;i++)
     {
-        SetTile(i,27,HUD_HORIZ);
+        SetTile(i,26,HUD_HORIZ);
     }
-    
+
     // And now the hero portrait.
-    DrawMap2(26,1, hero_portrait);
+    DrawMap2(24,2, hero_portrait);
+    
 }
 
+
+void GAMEi_ShowCredits(void)
+{
+    GAME_DrawBlankScreen();
+    GLB_PrintString(0, 14, cEnding1);
+    GLB_PrintString(5, 15, cEnding2);
+}
+
+
+///****************************************************************************
+/// This function draws our titlescreen, which is completely static.
+///****************************************************************************
 void GAME_DrawTitleScreen(void)
 {
-    DrawMap2(12,13, title);
-}
+#define VERT_START 4
 
+    FadeIn(4, false);
+    // First, a box.
+    for(unsigned char i = 1; i < 29;i++)
+    {
+        SetTile(i, VERT_START - 2, 41);
+        SetTile(i, VERT_START + 9, 41);
+    }
+    
+    SetTile(0, VERT_START-2, 40);
+    SetTile(29, VERT_START-2, 40);
+    SetTile(0, VERT_START+9, 40);
+    SetTile(29, VERT_START+9, 40);
+    
+    for(unsigned char i = VERT_START-1; i < VERT_START+9;i++)
+    {
+        SetTile(0, i, 42);
+        SetTile(29, i, 42);
+    }
+
+    // Put up our text...
+    GLB_PrintString(5, VERT_START+1, cTitle);
+    GLB_PrintString(8, VERT_START+14, cPressStart);
+    GLB_PrintString(0, 25, cBensoft);
+    GLB_PrintString(0, 26, cTiles);
+    DrawMap2(24,25, creative_commons);
+    
+    // And now draw the "big" stuff.
+    
+    // First, the D
+    SetTile(1,VERT_START,32);
+    SetTile(2,VERT_START,32);
+    SetTile(3,VERT_START,33);
+    for(unsigned char i = VERT_START+1; i < (VERT_START+5);i++)
+    {
+        SetTile(1,i,32);
+        SetTile(3,i,32);
+    }
+    SetTile(1,VERT_START+5,32);
+    SetTile(2,VERT_START+5,32);
+    SetTile(3,VERT_START+5,35);
+    
+    // now the u
+    SetTile(5,VERT_START+3,32);
+    SetTile(7,VERT_START+3,32);
+    SetTile(5,VERT_START+4,32);
+    SetTile(7,VERT_START+4,32);
+    SetTile(5,VERT_START+5,36);
+    SetTile(6,VERT_START+5,32);
+    SetTile(7,VERT_START+5,32);
+    
+    // now the n's
+    SetTile(9,VERT_START+3, 33);
+    SetTile(10,VERT_START+3, 32);
+    SetTile(11,VERT_START+3, 33);
+    SetTile(9,VERT_START+4,32);
+    SetTile(9,VERT_START+5,32);
+    SetTile(11,VERT_START+4,32);
+    SetTile(11,VERT_START+5,32);
+    SetTile(25,VERT_START+3, 33);
+    SetTile(26,VERT_START+3, 32);
+    SetTile(27,VERT_START+3, 33);
+    SetTile(25,VERT_START+4,32);
+    SetTile(25,VERT_START+5,32);
+    SetTile(27,VERT_START+4,32);
+    SetTile(27,VERT_START+5,32);
+    
+    // now the g
+    SetTile(13, VERT_START+3, 34);
+    SetTile(14, VERT_START+3, 32);
+    SetTile(15, VERT_START+3, 32);
+    SetTile(13, VERT_START+4, 32);
+    SetTile(15, VERT_START+4, 32);
+    SetTile(13, VERT_START+5, 36);
+    SetTile(14, VERT_START+5, 32);
+    SetTile(15, VERT_START+5, 32);
+    SetTile(15, VERT_START+6, 32);
+    SetTile(13, VERT_START+7, 36);
+    SetTile(14, VERT_START+7, 32);
+    SetTile(15, VERT_START+7, 35);
+    
+    // now e
+    SetTile(17,VERT_START+3,32);
+    SetTile(18,VERT_START+3,32);
+    SetTile(19,VERT_START+3,35);
+    SetTile(17,VERT_START+4,32);
+    SetTile(18,VERT_START+4,33);
+    SetTile(17,VERT_START+5,32);
+    SetTile(18,VERT_START+5,32);
+    SetTile(19,VERT_START+5,35);
+    
+    
+    // finally, the o
+    SetTile(21,VERT_START+3,34);
+    SetTile(22,VERT_START+3,32);
+    SetTile(23,VERT_START+3,33);
+    SetTile(21,VERT_START+4,32);
+    SetTile(23,VERT_START+4,32);
+    SetTile(21,VERT_START+5,36);
+    SetTile(22,VERT_START+5,32);
+    SetTile(23,VERT_START+5,35);
+}
