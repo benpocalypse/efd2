@@ -296,7 +296,15 @@ MapObject MAP_GetDoor(unsigned char bEntrance)
 ///****************************************************************************
 unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY)
 {
-    return (objMap[ucX/MODWIDTH][ucY] & (MODBITS << ((ucX%MODWIDTH)*MODSHIFT))) >> ((ucX%MODWIDTH)*MODSHIFT);
+    if((ucX < MAPWIDTH) && (ucY < MAPHEIGHT))
+    {
+        return (objMap[ucX/MODWIDTH][ucY] & (MODBITS << ((ucX%MODWIDTH)*MODSHIFT))) >> ((ucX%MODWIDTH)*MODSHIFT);
+    }
+    else
+    {
+        return 0U;
+    }
+        
 }
 
 ///****************************************************************************

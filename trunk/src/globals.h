@@ -1,9 +1,8 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-//#include "data/tileset.inc"
-//#include "data/sprites.inc"
-//#include "data/font.inc"
+#include "object.h"
+
 
 // Item related defines, a total of 16 in game items.
 #define HEALTH_POTION     0x0001
@@ -67,8 +66,10 @@ typedef struct
 } COORDINATE;
 
 // Functions that are used universally
-unsigned char GLB_RandomNum(unsigned char ucMin, unsigned char ucMax);
-COORDINATE GLB_MoveCoordinate(COORDINATE coord, signed char scX, signed char scY);
-
+unsigned char   GLB_RandomNum(unsigned char ucMin, unsigned char ucMax);
+COORDINATE      GLB_MoveCoordinate(COORDINATE coord, signed char scX, signed char scY);
+unsigned char   GLB_CoordinateToObjectCollision(COORDINATE coord, MapObject mapobj);
+void            GLB_PrintString(unsigned char x, unsigned char y, const char *string);
+void            GLB_PrintNumber(unsigned char x, unsigned char y, unsigned char ucNum);
 
 #endif

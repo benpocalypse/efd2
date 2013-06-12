@@ -13,7 +13,7 @@ INFO=../gameinfo.properties
 ## Kernel settings
 KERNEL_DIR = ../../../kernel
 KERNEL_OPTIONS  = -DVIDEO_MODE=3 -DINTRO_LOGO=0 -DSCROLLING=0 -DSOUND_CHANNEL_4_ENABLE=0 
-KERNEL_OPTIONS += -DMAX_SPRITES=14 -DRAM_TILES_COUNT=8 -DSCREEN_TILES_V=28 ##-DFIRST_RENDER_LINE=24 
+KERNEL_OPTIONS += -DMAX_SPRITES=14 -DRAM_TILES_COUNT=12 -DSCREEN_TILES_V=28 ##-DFIRST_RENDER_LINE=24 
 KERNEL_OPTIONS += -DVRAM_TILES_V=30 ##-DOVERLAY_LINES=4 
 
 ## Options common to compile, link and assembly rules
@@ -74,10 +74,10 @@ uzeboxSoundEngine.o: $(KERNEL_DIR)/uzeboxSoundEngine.c
 uzeboxVideoEngine.o: $(KERNEL_DIR)/uzeboxVideoEngine.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-globals.o: ../globals.c
+gamemanager.o: ../gamemanager.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 
-gamemanager.o: ../gamemanager.c
+globals.o: ../globals.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 	
 logicmanager.o: ../logicmanager.c
