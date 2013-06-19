@@ -26,21 +26,6 @@
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
 
-// Enum that holds each discrete state in our Logic FSM
-typedef enum
-{
-    INIT,
-    PROCESS_INPUT,
-    UPDATE_PLAYER,
-    ENEMY_LOGIC,
-    COLLISIONS,
-    UNKNOWN
-}LOGIC_STATE;
-
-
-// Private class variables
-static LOGIC_STATE eCurrentState;
-static LOGIC_STATE eRequestedState;
 
 // These variables are used to animate the player
 static unsigned char ucPlayerRunFrame;
@@ -50,15 +35,9 @@ static unsigned char bExitReached;
 
 
 // Private class functions
+void ProcessInput(void);
+void ProcessUpdatePlayer(void);
 
-// Mode handling functions
-static void ModeEntry(LOGIC_STATE eState);
-static void ModeExit(LOGIC_STATE eState);
-static void ProcessInit(void);
-static void ProcessInput(void);
-static void ProcessUpdatePlayer(void);
-static void ProcessEnemyLogic(void);
-static void ProcessCollisions(void);
 
 // Internal helper functions
 static COORDINATE SetPlayerStartLocation(void);
@@ -69,9 +48,6 @@ static void DrawPlayer(void);
 ///****************************************************************************
 void LGC_Init(void)
 {
-    // Set up our FSM variables to known safe states
-    eCurrentState = UNKNOWN;
-    eRequestedState = INIT;
     bRunning = false;
     bExitReached = false;
    
@@ -85,7 +61,10 @@ void LGC_Init(void)
     ucPlayerRun[0] = PLAYER_RUN1;
     ucPlayerRun[1] = PLAYER_RUN2;
     ucPlayerRun[2] = PLAYER_RUN3;
-    ucPlayerRun[3] = PLAYER_RUN4;    
+    ucPlayerRun[3] = PLAYER_RUN4;
+
+    // Put our player next to the entry door.
+    PLY_SetCoordinate(SetPlayerStartLocation());
 }
 
 
@@ -96,43 +75,9 @@ void LGC_Init(void)
 void LGC_ManageLogic(void)
 {   
     if(bRunning == true)
-    {            
-        // If we're supposed to switch states, take care of that here.
-        if(eCurrentState != eRequestedState)
-        {
-            ModeExit(eCurrentState);
-            ModeEntry(eRequestedState);
-            
-            eCurrentState = eRequestedState;
-        }
-        
-        switch(eCurrentState)
-        {
-            case INIT:
-                ProcessInit();
-                break;
-            
-            case PROCESS_INPUT:
-                ProcessInput();
-                break;
-                
-            case UPDATE_PLAYER:
-                ProcessUpdatePlayer();
-                break;
-                
-            case ENEMY_LOGIC:
-                ProcessEnemyLogic();
-                break;
-
-            case COLLISIONS:
-                ProcessCollisions();
-                break;
-                
-            default:
-                break;          
-        }
-        
-        // FIXME - This should be handled elsewhere.
+    {
+        ProcessInput();
+        ProcessUpdatePlayer();
         DrawPlayer();
     }
 }
@@ -151,79 +96,6 @@ void LGC_Start(void)
 void LGC_Stop(void)
 {
     bRunning = false;
-}
-
-
-///****************************************************************************
-/// This function takes care of any one time actions that will happen upon 
-/// exiting from the current mode.
-///****************************************************************************
-void ModeExit(LOGIC_STATE eState)
-{
-    switch(eState)
-    {
-        case INIT:            
-            break;
-        
-        case PROCESS_INPUT:
-            break;
-            
-        case UPDATE_PLAYER:
-            break;
-            
-        case ENEMY_LOGIC:
-            break;
-
-        case COLLISIONS:
-            break;
-            
-        default:
-            break;          
-    }
-}
-
-
-///****************************************************************************
-/// This function takes care of any one time actions that will happen upon 
-/// entry into a new mode.
-///****************************************************************************
-void ModeEntry(LOGIC_STATE eState)
-{
-    switch(eState)
-    {
-        case INIT:
-            bExitReached = false;
-            break;
-        
-        case PROCESS_INPUT:
-            break;
-            
-        case UPDATE_PLAYER:
-            break;
-            
-        case ENEMY_LOGIC:
-            break;
-
-        case COLLISIONS:
-            break;
-            
-        default:
-            break;          
-    }
-}
-
-
-///****************************************************************************
-/// Here, we just initialize all of our internal variables in order to start
-/// a new screen in our dungeon.
-///****************************************************************************
-void ProcessInit(void)
-{
-    // Put our player next to the entry door.
-    PLY_SetCoordinate(SetPlayerStartLocation());
-
-    // Now switch to our next state.
-    eRequestedState = PROCESS_INPUT;
 }
 
 
@@ -327,8 +199,6 @@ void ProcessInput(void)
             PLY_SetVelocity(--ucVel);
         }
     }
-    
-    eRequestedState = UPDATE_PLAYER;
 }
 
 
@@ -436,25 +306,6 @@ void ProcessUpdatePlayer(void)
     
     // And finally, update our player location    
     PLY_SetCoordinate(objNewCoord);
-        
-    // Move to our next state.
-    eRequestedState = ENEMY_LOGIC;
-}
-
-
-// FIXME - Implement functionality
-void ProcessEnemyLogic(void)
-{
-    eRequestedState = COLLISIONS;
-}
-
-
-// FIXME - Implement functionality
-void ProcessCollisions(void)
-{
-    
-
-    eRequestedState = PROCESS_INPUT;
 }
 
 
