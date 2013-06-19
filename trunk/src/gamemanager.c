@@ -10,7 +10,23 @@
 #include "data/sprites.inc"
 
 
-// Strings for our game to be printed.
+// Internal type definitions
+typedef enum
+{
+    GAME_INIT,
+    GAME_TITLESCREEN,
+    GAME_CUTSCENE,
+    GAME_PLAYLEVEL,
+    GAME_GAMEOVER,
+    GAME_CREDITS,
+    GAME_UNKNOWN
+} GAME_STATE;
+
+// Private class variables
+static GAME_STATE eCurrentState;
+static GAME_STATE eRequestedState;
+
+// Private strings for our game to be printed.
 const char cLife[] PROGMEM = "Life:";
 const char cKeys[] PROGMEM = "Keys:";
 const char cGold[] PROGMEM = "Gold:";
@@ -21,20 +37,19 @@ const char cTiles[] PROGMEM = "Oryx Lo-Fi, oryxdesignlab.com";
 const char cEnding1[] PROGMEM = "Sorry this game is incomplete.";
 const char cEnding2[] PROGMEM = "Thanks for playing!";
 
-typedef enum
-{
-    GAME_INIT,
-    GAME_TITLESCREEN,
-    GAME_CUTSCENE,
-    GAME_PLAYLEVEL,
-    GAME_GAMEOVER,
-    GAME_UKNOWN
-} GAME_STATE;
-
-// Internal function prototypes
+// Private class functions
 void GAMEi_DrawStaticHUD(void);
-
 void GAMEi_ShowCredits(void);
+
+// Mode handling functions
+static void ModeEntry(GAME_STATE eState);
+static void ModeExit(GAME_STATE eState);
+static void ProcessInit(void);
+static void ProcessTitlescreen(void);
+static void ProcessCutscene(void);
+static void ProcessPlaylevel(void);
+static void ProcessGameover(void);
+static void ProcessCredits(void);
 
 
 void GAME_Init(void)
@@ -76,11 +91,12 @@ void GAME_ManageGame(void)
     
         if(LGC_ExitReached() == true)
         {
-            GAME_ScreenPassed();
             MAP_InitializeMap();
 	        MAP_GenerateMap(GLB_RandomNum(0,2));
 	        MAP_DrawMyMap();
-	        MAP_DrawObjects();	    
+	        MAP_DrawObjects();
+
+            GAME_ScreenPassed();	    
         }
     }
     //SetSpriteVisibility(true);    
