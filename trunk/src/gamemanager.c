@@ -52,6 +52,141 @@ static void ProcessGameover(void);
 static void ProcessCredits(void);
 
 
+void GAME_ManageGame(void)
+{
+    if(eRequestedState != eCurrentState)
+    {
+        ModeExit(eCurrentState);
+        ModeEntry(eRequestedState);
+        eCurrentState = eRequestedState; 
+    }
+
+    switch(eCurrentState)
+    {
+        case GAME_INIT:
+            ProcessInit();
+            break;
+
+        case GAME_TITLESCREEN:
+            ProcessTitleScreen();
+            break;
+
+        case GAME_CUTSCENE:
+            ProcessCutscene();
+            break;
+
+        case GAME_PLAYLEVEL:
+            ProcessPlaylevel();
+            break;
+
+        case GAME_GAMEOVER;
+            ProcessGameover();
+            break;
+
+        case GAME_CREDITS:
+            ProcessCredits();
+            break;
+
+        case GAME_UNKNOWN;
+            break;
+    }
+}
+
+static void ModeEntry(GAME_STATE eState)
+{
+    switch(eState)
+    {
+        case GAME_INIT:
+            break;
+
+        case GAME_TITLESCREEN:
+            break;
+
+        case GAME_CUTSCENE:
+            break;
+
+        case GAME_PLAYLEVEL:
+            break;
+
+        case GAME_GAMEOVER;
+            break;
+
+        case GAME_CREDITS:
+            break;
+
+        case GAME_UNKNOWN;
+            break;
+
+        default:
+            break;
+    }
+}
+
+
+static void ModeExit(GAME_STATE eState)
+{
+    switch(eState)
+    {
+        case GAME_INIT:
+            break;
+
+        case GAME_TITLESCREEN:
+            break;
+
+        case GAME_CUTSCENE:
+            break;
+
+        case GAME_PLAYLEVEL:
+            break;
+
+        case GAME_GAMEOVER;
+            break;
+
+        case GAME_CREDITS:
+            break;
+
+        case GAME_UNKNOWN;
+            break;
+
+        default:
+            break;
+    }
+}
+
+
+static void ProcessInit(void)
+{
+    ClearVram();
+    SetTileTable(efd2_tiles);
+    SetSpritesTileTable(efd2_sprites);
+    SetSpriteVisibility(true);
+    LGC_Init();
+    LGC_Start();
+    PLY_Init();
+    //SetSpriteVisibility(false);
+}
+
+static void ProcessTitlescreen(void)
+{
+}
+
+static void ProcessCutscene(void)
+{
+}
+
+static void ProcessPlaylevel(void)
+{
+}
+
+static void ProcessGameover(void)
+{
+}
+
+static void ProcessCredits(void)
+{
+}
+
+
 void GAME_Init(void)
 {
     ClearVram();
