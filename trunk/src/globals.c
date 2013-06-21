@@ -75,7 +75,7 @@ COORDINATE GLB_MoveCoordinate(COORDINATE coord, signed char scX, signed char scY
 /// This function takes a COORDINATE and a MapObj and tests to see if they are
 /// colliding. If they are, it returns true, otherwise, returns false.
 ///****************************************************************************
-unsigned char   GLB_CoordinateToObjectCollision(COORDINATE coord, MapObject mapobj)
+unsigned char GLB_CoordinateToObjectCollision(COORDINATE coord, MapObject mapobj)
 {
     if((coord.ucBigX <= (mapobj.ucX+1)) && (coord.ucBigX >= (mapobj.ucX-1)) &&
        (coord.ucBigY <= (mapobj.ucY+1)) && (coord.ucBigY >= (mapobj.ucY-1)))
@@ -156,62 +156,6 @@ void GLB_PrintNumber(unsigned char x, unsigned char y, unsigned char ucNum)
 }
 
 
-/*
-void SERIAL_NumberOut(const unsigned long ulNumber, const unsigned char ucDigits)
-{
-    #ifdef DEBUG
-    unsigned char i;
-    char cTempVal[DIGITS_LONG + 1U]; // One extra for null termination of ascii
-       
-    // Init array to NULL chars
-    for(i = 0; i < (DIGITS_LONG + 1U); i++)
-    {
-        cTempVal[i] = '\0';
-    }
-    
-    itoa(ulNumber, ucDigits, cTempVal);   
-   
-    SERIAL_StringOut(cTempVal);
-    #endif    
-}
-
-
-void itoa(long lNumber, unsigned char ucLength, char *ptrCharArray)
-{
-    unsigned long ulNumber;
-    unsigned char i = 1U;
-
-    // Check for negative number
-    if (lNumber < 0)
-    {
-        ptrCharArray[ucLength - i] = '-';
-        
-        ulNumber = lNumber * -1;
-        i++;
-    }
-    else
-    {
-        ulNumber = (unsigned long)lNumber;   
-    }
-    
-    while (i <= ucLength)
-    {
-        if (ulNumber > 0U)
-        {
-            ptrCharArray[ucLength - i] = 48U + (ulNumber % 10U);
-            ulNumber /= 10U;
-        }
-        else
-        {
-            ptrCharArray[ucLength - i] = 48; // Pad with 0's if needed
-        }
-        
-        i++;
-    }
-}
-*/
-
-
 ///****************************************************************************
 /// This function translates the ASCII char passed in to our specific internal
 /// font tile table. It relies on the font being loaded after the tiles, but
@@ -286,3 +230,4 @@ void GLBi_SetFont(unsigned char x,unsigned char y,unsigned char c)
         SetTile(x,y,c);
     }
 }
+
