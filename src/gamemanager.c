@@ -164,10 +164,13 @@ static void ProcessInit(void)
     LGC_Start();
     PLY_Init();
     //SetSpriteVisibility(false);
+
+    eRequestedState = GAME_TITLESCREEN;
 }
 
 static void ProcessTitlescreen(void)
 {
+    GAME_DrawTitleScreen();
 }
 
 static void ProcessCutscene(void)
@@ -176,6 +179,24 @@ static void ProcessCutscene(void)
 
 static void ProcessPlaylevel(void)
 {
+    if(PLY_GetScreensPassed() == 5)
+    {
+        eRequestedState = GAME_CREDITS;
+    }
+    else
+    {
+        LGC_ManageLogic();
+    
+        if(LGC_ExitReached() == true)
+        {
+            MAP_InitializeMap();
+	        MAP_GenerateMap(GLB_RandomNum(0,2));
+	        MAP_DrawMyMap();
+	        MAP_DrawObjects();
+
+            GAME_ScreenPassed();	    
+        }
+    }
 }
 
 static void ProcessGameover(void)
@@ -184,19 +205,19 @@ static void ProcessGameover(void)
 
 static void ProcessCredits(void)
 {
+    GAMEi_ShowCredits();
+
+    if(INPUT_GetButton() == IN_START)
+    {
+        eRequestedState = GAME_INIT;
+    }
 }
 
 
 void GAME_Init(void)
 {
-    ClearVram();
-    SetTileTable(efd2_tiles);
-    SetSpritesTileTable(efd2_sprites);
-    SetSpriteVisibility(true);
-    LGC_Init();
-    LGC_Start();
-    PLY_Init();
-    //SetSpriteVisibility(false);
+    eState = GAME_UNKNOWN;
+    eRequestedState = GAME_INIT;
 }
 
 
@@ -213,29 +234,6 @@ void GAME_ScreenPassed(void)
     PLY_PassedScreen();
 }
 
-
-void GAME_ManageGame(void)
-{
-    if(PLY_GetScreensPassed() == 5)
-    {
-        GAMEi_ShowCredits();
-    }
-    else
-    {
-        LGC_ManageLogic();
-    
-        if(LGC_ExitReached() == true)
-        {
-            MAP_InitializeMap();
-	        MAP_GenerateMap(GLB_RandomNum(0,2));
-	        MAP_DrawMyMap();
-	        MAP_DrawObjects();
-
-            GAME_ScreenPassed();	    
-        }
-    }
-    //SetSpriteVisibility(true);    
-}
 
 void GAME_DrawHud(void)
 {
