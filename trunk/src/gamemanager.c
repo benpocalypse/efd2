@@ -25,6 +25,7 @@ typedef enum
 // Private class variables
 static GAME_STATE eCurrentState;
 static GAME_STATE eRequestedState;
+static unsigned char ucTime;
 
 // Private strings for our game to be printed.
 const char cLife[] PROGMEM = "Life:";
@@ -52,8 +53,25 @@ static void ProcessGameover(void);
 static void ProcessCredits(void);
 
 
+///****************************************************************************
+/// Here we just initialize our class variables to sane defaults.
+///****************************************************************************
+void GAME_Init(void)
+{
+    eState = GAME_UNKNOWN;
+    eRequestedState = GAME_INIT;
+    ucTime = 0U;
+}
+
+
+///****************************************************************************
+/// This function takes care of managing our FSM that controls the flow of the
+/// EfD2 game. It handles mode entry, exit, and processing for each of our
+/// states.
+///****************************************************************************
 void GAME_ManageGame(void)
 {
+    // Now, if our state needs to change, handle our entrance/exit conditions.
     if(eRequestedState != eCurrentState)
     {
         ModeExit(eCurrentState);
@@ -61,6 +79,8 @@ void GAME_ManageGame(void)
         eCurrentState = eRequestedState; 
     }
 
+
+    // Now finally process our current state's action.
     switch(eCurrentState)
     {
         case GAME_INIT:
@@ -91,6 +111,7 @@ void GAME_ManageGame(void)
             break;
     }
 }
+
 
 static void ModeEntry(GAME_STATE eState)
 {
@@ -168,20 +189,36 @@ static void ProcessInit(void)
     eRequestedState = GAME_TITLESCREEN;
 }
 
+
 static void ProcessTitlescreen(void)
 {
     GAME_DrawTitleScreen();
+
+    // Wait at the titlescreen until the player pushes start.
+    while(INPUT_GetButton(IN_START) != true)
+    {
+        ucTime++;
+    }
+
+    // We seed our random number here, because it relies on the randomness of
+    // the player pressing start after they've been at the title screen.
+    srand((unsigned)ucTime);
+
+    eRequestedState = GAME_CUTSCENE;
 }
+
 
 static void ProcessCutscene(void)
 {
+    eRequestedState = GAME_PLAYLEVEL;
 }
+
 
 static void ProcessPlaylevel(void)
 {
     if(PLY_GetScreensPassed() == 5)
     {
-        eRequestedState = GAME_CREDITS;
+        eRequestedState = GAME_GAMEOVER;
     }
     else
     {
@@ -199,9 +236,12 @@ static void ProcessPlaylevel(void)
     }
 }
 
+
 static void ProcessGameover(void)
 {
+    eRequestedState = GAME_CREDITS;
 }
+
 
 static void ProcessCredits(void)
 {
@@ -211,13 +251,6 @@ static void ProcessCredits(void)
     {
         eRequestedState = GAME_INIT;
     }
-}
-
-
-void GAME_Init(void)
-{
-    eState = GAME_UNKNOWN;
-    eRequestedState = GAME_INIT;
 }
 
 
@@ -237,11 +270,6 @@ void GAME_ScreenPassed(void)
 
 void GAME_DrawHud(void)
 {
-    // Draw HUD text
-    GLB_PrintString(2, 2, cLife); 
-    GLB_PrintString(2, 3, cKeys);
-    GLB_PrintString(2, 4, cGold);
-    
     // Draw player hearts.
     for(unsigned char i = 0; i < PLY_GetTotalHealth(); i++)
     {
@@ -255,7 +283,6 @@ void GAME_DrawHud(void)
         }
     }
 
-
     GAMEi_DrawStaticHUD();
 }
 
@@ -266,6 +293,11 @@ void GAME_DrawHud(void)
 ///****************************************************************************
 void GAMEi_DrawStaticHUD(void)
 {
+    // Draw HUD text
+    GLB_PrintString(2, 2, cLife); 
+    GLB_PrintString(2, 3, cKeys);
+    GLB_PrintString(2, 4, cGold);
+
     // Draw the vertical lines.
     for(unsigned char i=2;i<27;i++)
     {
