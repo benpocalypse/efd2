@@ -43,14 +43,44 @@ int main()
 	//InitMusicPlayer(patches);
 	//SetMasterVolume(0x40);
 	//StartSong(song_nsmb);
-		
+	
+	unsigned char ucTime = 0;
+	
 	ClearVram();
 	
 	GAME_Init();
+/*
+    GAME_DrawTitleScreen();
+    while(INPUT_GetButton(IN_START) != true)
+    {
+        ucTime++;
+    }
 	
+	// We seed our random number here, because it relies on the randomness of
+	// the player pressing start after they've been to the title screen.
+	srand((unsigned)ucTime);
+	
+	GAME_DrawBlankScreen();
+	GAME_DrawHud();
+*/	
 	while(1)
-	{ 
+	{	    
 		WaitVsync(1);
-    GAME_ManageGame();
-	} 
+        GAME_ManageGame();
+/*
+        // FIXME - This is here just in case you get stuck.
+		if(INPUT_GetButton(IN_START) == true)
+		{
+    		
+		    MAP_InitializeMap();
+   	        MAP_DrawMyMap();   	        
+	        MAP_GenerateMap(GLB_RandomNum(0,2));
+	        MAP_DrawMyMap();
+	        MAP_DrawObjects();
+	        GAME_ScreenPassed();
+		}
+*/		
+	}		
+	
 }
+

@@ -2,12 +2,14 @@
 #include "globals.h"
 #include "logicmanager.h"
 #include "player.h"
+#include "input.h"
+#include "map.h"
 #include <avr/pgmspace.h>
 #include <uzebox.h>
 
 // Include our tile data
-#include "data/tileset.inc"
 #include "data/sprites.inc"
+#include "data/tileset.inc"
 
 
 // Internal type definitions
@@ -25,7 +27,6 @@ typedef enum
 // Private class variables
 static GAME_STATE eCurrentState;
 static GAME_STATE eRequestedState;
-static unsigned char ucTime;
 
 // Private strings for our game to be printed.
 const char cLife[] PROGMEM = "Life:";
@@ -53,25 +54,8 @@ static void ProcessGameover(void);
 static void ProcessCredits(void);
 
 
-///****************************************************************************
-/// Here we just initialize our class variables to sane defaults.
-///****************************************************************************
-void GAME_Init(void)
-{
-    eState = GAME_UNKNOWN;
-    eRequestedState = GAME_INIT;
-    ucTime = 0U;
-}
-
-
-///****************************************************************************
-/// This function takes care of managing our FSM that controls the flow of the
-/// EfD2 game. It handles mode entry, exit, and processing for each of our
-/// states.
-///****************************************************************************
 void GAME_ManageGame(void)
 {
-    // Now, if our state needs to change, handle our entrance/exit conditions.
     if(eRequestedState != eCurrentState)
     {
         ModeExit(eCurrentState);
@@ -79,8 +63,6 @@ void GAME_ManageGame(void)
         eCurrentState = eRequestedState; 
     }
 
-
-    // Now finally process our current state's action.
     switch(eCurrentState)
     {
         case GAME_INIT:
@@ -88,7 +70,7 @@ void GAME_ManageGame(void)
             break;
 
         case GAME_TITLESCREEN:
-            ProcessTitleScreen();
+            ProcessTitlescreen();
             break;
 
         case GAME_CUTSCENE:
@@ -99,7 +81,7 @@ void GAME_ManageGame(void)
             ProcessPlaylevel();
             break;
 
-        case GAME_GAMEOVER;
+        case GAME_GAMEOVER:
             ProcessGameover();
             break;
 
@@ -107,11 +89,10 @@ void GAME_ManageGame(void)
             ProcessCredits();
             break;
 
-        case GAME_UNKNOWN;
+        case GAME_UNKNOWN:
             break;
     }
 }
-
 
 static void ModeEntry(GAME_STATE eState)
 {
@@ -121,21 +102,28 @@ static void ModeEntry(GAME_STATE eState)
             break;
 
         case GAME_TITLESCREEN:
+            GAME_DrawTitleScreen();
             break;
 
         case GAME_CUTSCENE:
             break;
 
         case GAME_PLAYLEVEL:
+            MAP_InitializeMap();
+            MAP_GenerateMap(GLB_RandomNum(0,2));
+            MAP_DrawMyMap();
+            MAP_DrawObjects();
+            LGC_Init();
+            LGC_Start();
             break;
 
-        case GAME_GAMEOVER;
+        case GAME_GAMEOVER:
             break;
 
         case GAME_CREDITS:
             break;
 
-        case GAME_UNKNOWN;
+        case GAME_UNKNOWN:
             break;
 
         default:
@@ -152,6 +140,7 @@ static void ModeExit(GAME_STATE eState)
             break;
 
         case GAME_TITLESCREEN:
+            GAME_DrawBlankScreen();
             break;
 
         case GAME_CUTSCENE:
@@ -160,13 +149,13 @@ static void ModeExit(GAME_STATE eState)
         case GAME_PLAYLEVEL:
             break;
 
-        case GAME_GAMEOVER;
+        case GAME_GAMEOVER:
             break;
 
         case GAME_CREDITS:
             break;
 
-        case GAME_UNKNOWN;
+        case GAME_UNKNOWN:
             break;
 
         default:
@@ -189,36 +178,23 @@ static void ProcessInit(void)
     eRequestedState = GAME_TITLESCREEN;
 }
 
-
 static void ProcessTitlescreen(void)
 {
-    GAME_DrawTitleScreen();
-
-    // Wait at the titlescreen until the player pushes start.
-    while(INPUT_GetButton(IN_START) != true)
+    if(INPUT_GetButton(IN_START) == IN_START)
     {
-        ucTime++;
+        eRequestedState = GAME_PLAYLEVEL;
     }
-
-    // We seed our random number here, because it relies on the randomness of
-    // the player pressing start after they've been at the title screen.
-    srand((unsigned)ucTime);
-
-    eRequestedState = GAME_CUTSCENE;
 }
-
 
 static void ProcessCutscene(void)
 {
-    eRequestedState = GAME_PLAYLEVEL;
 }
-
 
 static void ProcessPlaylevel(void)
 {
     if(PLY_GetScreensPassed() == 5)
     {
-        eRequestedState = GAME_GAMEOVER;
+        eRequestedState = GAME_CREDITS;
     }
     else
     {
@@ -236,21 +212,25 @@ static void ProcessPlaylevel(void)
     }
 }
 
-
 static void ProcessGameover(void)
 {
-    eRequestedState = GAME_CREDITS;
 }
-
 
 static void ProcessCredits(void)
 {
     GAMEi_ShowCredits();
 
-    if(INPUT_GetButton() == IN_START)
+    if(INPUT_GetButton(IN_START) == IN_START)
     {
         eRequestedState = GAME_INIT;
     }
+}
+
+
+void GAME_Init(void)
+{
+    eCurrentState = GAME_UNKNOWN;
+    eRequestedState = GAME_INIT;
 }
 
 
@@ -270,6 +250,11 @@ void GAME_ScreenPassed(void)
 
 void GAME_DrawHud(void)
 {
+    // Draw HUD text
+    GLB_PrintString(2, 2, cLife); 
+    GLB_PrintString(2, 3, cKeys);
+    GLB_PrintString(2, 4, cGold);
+    
     // Draw player hearts.
     for(unsigned char i = 0; i < PLY_GetTotalHealth(); i++)
     {
@@ -283,6 +268,7 @@ void GAME_DrawHud(void)
         }
     }
 
+
     GAMEi_DrawStaticHUD();
 }
 
@@ -293,11 +279,6 @@ void GAME_DrawHud(void)
 ///****************************************************************************
 void GAMEi_DrawStaticHUD(void)
 {
-    // Draw HUD text
-    GLB_PrintString(2, 2, cLife); 
-    GLB_PrintString(2, 3, cKeys);
-    GLB_PrintString(2, 4, cGold);
-
     // Draw the vertical lines.
     for(unsigned char i=2;i<27;i++)
     {
