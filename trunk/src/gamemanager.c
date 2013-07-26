@@ -170,11 +170,9 @@ static void ProcessInit(void)
     SetTileTable(efd2_tiles);
     SetSpritesTileTable(efd2_sprites);
     SetSpriteVisibility(true);
+    PLY_Init();
     LGC_Init();
     LGC_Start();
-    PLY_Init();
-    //SetSpriteVisibility(false);
-
     eRequestedState = GAME_TITLESCREEN;
 }
 
