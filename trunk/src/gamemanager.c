@@ -178,7 +178,7 @@ static void ProcessInit(void)
 
 static void ProcessTitlescreen(void)
 {
-    if(INPUT_GetButton(IN_START) == IN_START)
+    if(INPUT_GetButton(IN_START) == true)
     {
         eRequestedState = GAME_PLAYLEVEL;
     }
@@ -218,7 +218,7 @@ static void ProcessCredits(void)
 {
     GAMEi_ShowCredits();
 
-    if(INPUT_GetButton(IN_START) == IN_START)
+    if(INPUT_GetButton(IN_START) == true)
     {
         eRequestedState = GAME_INIT;
     }
