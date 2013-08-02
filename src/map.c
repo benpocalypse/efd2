@@ -8,18 +8,27 @@
 #define MODSHIFT    2U  // The number of bits to shift when compressing our tiles
 #define MODBITS     3U // The bits for an OR/AND mask in half of an unsigned char
 
+// Array size defines
+#define MAX_OBSTACLES   5U
+#define MAX_ITEMS       5U
+
 // Our map data storage array
 static unsigned char objMap[(MAPWIDTH/MODWIDTH)][MAPHEIGHT];
 
 // Our entry and exit door objects.
 static MapObject objEntrance;
 static MapObject objExit;
+static MapObject objObstacles[MAX_OBSTACLES];
+static MapObject objItems[MAX_ITEMS];
+
 
 // Private function prototypes
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
 static void Draw(unsigned char ucX, unsigned char ucY, unsigned char ucType);
 static void FloodFill(unsigned char x, unsigned char y, unsigned char ucType);
 static void AddDoor(unsigned char ucDirection, bool bEntrance);
+static void AddObstacles(unsigned char ucNumber);
+static void AddItems(unsigned char ucNumber);
 
 
 ///****************************************************************************
@@ -27,6 +36,7 @@ static void AddDoor(unsigned char ucDirection, bool bEntrance);
 ///****************************************************************************
 void MAP_InitializeMap(void)
 {
+    // Empty our map...
     for(unsigned char i = 0U; i < (MAPWIDTH/MODWIDTH);i++)
     {
         for(unsigned char j = 0U; j < MAPHEIGHT;j++)
@@ -34,9 +44,23 @@ void MAP_InitializeMap(void)
             objMap[i][j] = MT_EMPTY;
         }
     }
+
+    // And our obstacles...
+    for(unsigned char i = 0U; i < MAX_OBSTACLES; i++)
+    {
+        objObstacles[i].ucType = EMPTY;
+        objObstacles[i].ucX = 0U;
+        objObstacles[i].ucY = 0U;
+    }
+
+    // and finally our items.
+    for(unsigned char i = 0U; i < MAX_ITEMS; i++)
+    {
+        objItems[i].ucType = EMPTY;
+        objItems[i].ucX = 0U;
+        objitems[i].ucY = 0U;
+    }
 }
-
-
 ///****************************************************************************
 /// This function takes care of actually generating the 'maze' and fills it
 /// with the appropriate tiles. The argument just tells us which type of 
@@ -306,6 +330,31 @@ unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY)
     }
         
 }
+
+
+///****************************************************************************
+/// This function allows outside classes to see which objects are at which X/Y
+/// coordinate to allow for things like collision detection.
+///****************************************************************************
+unsigned char MAP_ObjectIs(unsigned char ucX, unsigned char ucY)
+{
+    for(unsigned char i = 0U; i < MAX_OBSTACLES; i++)
+    {
+        if((objObstacles[i].ucX == ucX) && (objObstacles[i].ucY == ucY))
+        {
+            return objObstacles[i].ucType;
+        }
+    }
+
+    for(unsigned char i = 0U; i < MAX_ITEMS; i++)
+    {
+        if((objItems[i].ucX == ucX) && (objItems[i].ucY == ucY))
+        {
+            return objItems[i].ucType;
+        }
+    }
+}
+
 
 ///****************************************************************************
 /// Implements Bresenham's line drawing algorithm to efficiently draw lines
