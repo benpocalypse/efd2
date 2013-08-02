@@ -24,5 +24,6 @@ void MAP_DrawMyMap(void);
 void MAP_DrawObjects(void);
 MapObject     MAP_GetDoor(unsigned char bEntrance);
 unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY);
+unsigned char MAP_ObjectIs(unsigned char ucX, unsigned char ucY);
 
 #endif
