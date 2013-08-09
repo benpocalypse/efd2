@@ -6,7 +6,7 @@
 // Map compresipon size defines
 #define MODWIDTH	4U  // The number of tiles to be stored in a single unsigned char
 #define MODSHIFT    2U  // The number of bits to shift when compressing our tiles
-#define MODBITS     3U // The bits for an OR/AND mask in half of an unsigned char
+#define MODBITS     3U  // The bits for an OR/AND mask in half of an unsigned char
 
 // Array size defines
 #define MAX_OBSTACLES   5U
@@ -20,7 +20,6 @@ static MapObject objEntrance;
 static MapObject objExit;
 static MapObject objObstacles[MAX_OBSTACLES];
 static MapObject objItems[MAX_ITEMS];
-
 
 // Private function prototypes
 static void DrawLine(unsigned char ucStartX, unsigned char ucStartY, unsigned char ucEndX, unsigned char ucEndY, unsigned char cTile);
@@ -61,6 +60,8 @@ void MAP_InitializeMap(void)
         objitems[i].ucY = 0U;
     }
 }
+
+
 ///****************************************************************************
 /// This function takes care of actually generating the 'maze' and fills it
 /// with the appropriate tiles. The argument just tells us which type of 
@@ -248,6 +249,10 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             AddDoor(DOWN, false);
         }
     }
+
+
+    // Now pepper our room with 'stuff.'
+    AddObstacles(MAX_OBSTACLES);
 }
 
 
@@ -294,9 +299,18 @@ void MAP_DrawMyMap(void)
 ///****************************************************************************
 void MAP_DrawObjects(void)
 {
-    SetTile(objEntrance.ucX+3, objEntrance.ucY+7, objEntrance.ucType);
-    SetTile(objExit.ucX+3, objExit.ucY+7, objExit.ucType);    
+    SetTile(objEntrance.ucX+MAP_X_OFFSET, objEntrance.ucY+MAP_Y_OFFSET, objEntrance.ucType);
+    SetTile(objExit.ucX+MAP_X_OFFSET, objExit.ucY+MAP_Y_OFFSET, objExit.ucType);    
+
+    for(unsigned char i=0; i < MAX_OBSTACLES; i++)
+    {
+        if(objObstacles[i].ucType != 0)
+        {
+            SetTile(objObstacles[i].ucX+MAP_X_OFFSET, objObstacles[i].ucY+MAP_Y_OFFSET, objObstacles[i].ucType);
+        }
+    }
 }
+
 
 ///****************************************************************************
 /// Returns the location of either the entrance or exit of the map.
@@ -327,8 +341,7 @@ unsigned char MAP_TileIs(unsigned char ucX, unsigned char ucY)
     else
     {
         return 0U;
-    }
-        
+    }   
 }
 
 
@@ -354,7 +367,6 @@ unsigned char MAP_ObjectIs(unsigned char ucX, unsigned char ucY)
         }
     }
 }
-
 
 ///****************************************************************************
 /// Implements Bresenham's line drawing algorithm to efficiently draw lines
@@ -633,3 +645,72 @@ void AddDoor(unsigned char ucDirection, bool bEntrance)
     }
 }
 
+
+///****************************************************************************
+/// This function adds obstacles to our map based on how many we want. The idea
+/// is that we randomly sprinkle obstacles around our map.
+/// FIXME - this funtion needs to be made more robust to allow for more functionality.
+///****************************************************************************
+void AddObstacles(unsigned char ucNumber)
+{
+    // First, clear out our old obstacles.
+    for(unsigned char i = 0; i < MAX_OBSTACLES; i++)
+    {
+        objObstacles[i].ucX = 0U;
+        objObstacles[i].ucY = 0U;
+        objObstacles[i].ucType = EMPTY;
+    }
+
+    // Now, populate a new set of random obstacles, up to the number requested.
+    if(ucNumber < MAX_OBSTACLES)
+    {
+        for(unsigned char i = 0; i < ucNumber; i++)
+        {
+            objObstacles[i].ucX = GLB_RandomNum(0, MAPWIDTH);
+            objObstacles[i].ucY = GLB_RandomNum(0, MAPHEIGHT);
+
+            while(MAP_TileIs(objObstacles[i].ucX, objObstacles[i].ucY) != MT_FLOOR)
+            {
+                objObstacles[i].ucX = GLB_RandomNum(0, MAPWIDTH);
+                objObstacles[i].ucY = GLB_RandomNum(0, MAPHEIGHT);
+            }
+
+            objObstacles[i].ucType = WALL_SINGLE;
+        }
+    }
+}
+
+
+///****************************************************************************
+/// This function adds items to our map based on how many we want. The idea
+/// is that we randomly sprinkle items around our map.
+/// FIXME - This function doesn't work...items are 1's hot notation.
+///****************************************************************************
+void AddItems(unsigned char ucNumber)
+{
+    // First, clear out our old obstacles.
+    for(unsigned char i = 0; i < MAX_OBSTACLES; i++)
+    {
+        objItems[i].ucX = 0U;
+        objItems[i].ucY = 0U;
+        objItems[i].ucType = EMPTY;
+    }
+
+    // Now, populate a new set of random obstacles, up to the number requested.
+    if(ucNumber < MAX_OBSTACLES)
+    {
+        for(unsigned char i = 0; i < ucNumber; i++)
+        {
+            objItems[i].ucX = GLB_RandomNum(0, MAPWIDTH);
+            objItems[i].ucY = GLB_RandomNum(0, MAPHEIGHT);
+
+            while(MAP_TileIs(objItems[i].ucX, objItems[i].ucY) != MT_FLOOR)
+            {
+                objItems[i].ucX = GLB_RandomNum(0, MAPWIDTH);
+                objItems[i].ucY = GLB_RandomNum(0, MAPHEIGHT);
+            }
+
+            objItems[i].ucType = EMPTY;
+        }
+    }
+}
