@@ -63,14 +63,17 @@ void LGC_Init(void)
     ucPlayerRun[2] = PLAYER_RUN3;
     ucPlayerRun[3] = PLAYER_RUN4;
 
-    // Put our player next to the entry door.
+    // Put our player next to the entry door. This is somewhat of a hack,
+    // because the map must first be generated for this to work, and that
+    // is outside the responsibility of the logic manager class.
     PLY_SetCoordinate(SetPlayerStartLocation());
 }
 
 
 ///****************************************************************************
-/// This function is the heart of our FSM. It handles changing modes, and
-/// processing any tasks that would happen inside any of the individual states.
+/// This function handles, sequentially, all of the things the logic manager
+/// class is tasked with handling. This includes checking input during gameply,
+/// doing player collision detection, and drawing the player.
 ///****************************************************************************
 void LGC_ManageLogic(void)
 {   
@@ -82,17 +85,30 @@ void LGC_ManageLogic(void)
     }
 }
 
+
+///****************************************************************************
+/// Simple outside getter to see if the player is at the exit door.
+///****************************************************************************
 unsigned char LGC_ExitReached(void)
 {
     return bExitReached;
 }
 
+
+///****************************************************************************
+/// Outside setter function that will enable the processing of the logic
+/// manager's functionality.
+///****************************************************************************
 void LGC_Start(void)
 {
     bRunning = true;
 }
 
 
+///****************************************************************************
+/// Outside setter function that will disable the processing of the logic
+/// manager's functionality.
+///****************************************************************************
 void LGC_Stop(void)
 {
     bRunning = false;
