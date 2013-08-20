@@ -57,7 +57,7 @@ void MAP_InitializeMap(void)
     {
         objItems[i].ucType = EMPTY;
         objItems[i].ucX = 0U;
-        objitems[i].ucY = 0U;
+        objItems[i].ucY = 0U;
     }
 }
 
@@ -169,8 +169,6 @@ void MAP_GenerateMap(unsigned char ucRoomType)
                 AddDoor(LEFT, false);
             }
         }
-
-        return;
     }
 
     // One big room, with multiple obstacles.
@@ -252,7 +250,7 @@ void MAP_GenerateMap(unsigned char ucRoomType)
 
 
     // Now pepper our room with 'stuff.'
-    AddObstacles(MAX_OBSTACLES);
+    AddObstacles(MAX_OBSTACLES-1);
 }
 
 
