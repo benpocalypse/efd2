@@ -3,7 +3,6 @@
 #include "input.h"
 #include "map.h"
 #include "player.h"
-//#include "globals.h"
 
 #include <avr/pgmspace.h>
 #include <uzebox.h>
@@ -22,6 +21,10 @@
 
 // This just defines how long we delay on each frame to achieve smooth animation
 #define FRAME_COUNTER       3U
+
+// This defines a delay counter to prevent the Logic Manager from processing 
+// too quickly, and having everything run too fast.
+#define LOGIC_DELAY         3U
 
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
@@ -77,12 +80,17 @@ void LGC_Init(void)
 ///****************************************************************************
 void LGC_ManageLogic(void)
 {   
-    if(bRunning == true)
+    static unsigned char ucDelay = 0U;
+        
+    if((ucDelay == LOGIC_DELAY) && (bRunning == true))
     {
         ProcessInput();
         ProcessUpdatePlayer();
         DrawPlayer();
+        ucDelay = 0U;
     }
+    
+    ucDelay++;
 }
 
 

@@ -4,6 +4,8 @@
 #include "player.h"
 #include "input.h"
 #include "map.h"
+#include <stdlib.h>
+#include <math.h>
 #include <avr/pgmspace.h>
 #include <uzebox.h>
 
@@ -113,6 +115,7 @@ static void ModeEntry(GAME_STATE eState)
             MAP_GenerateMap(GLB_RandomNum(0,2));
             MAP_DrawMyMap();
             MAP_DrawObjects();
+            GAME_DrawHud();
             LGC_Init();
             LGC_Start();
             break;
@@ -178,10 +181,20 @@ static void ProcessInit(void)
 
 static void ProcessTitlescreen(void)
 {
-    if(INPUT_GetButton(IN_START) == true)
+    unsigned char ucTime = 0U;
+    
+    while(INPUT_GetButton(IN_START) != true)
+    {
+        ucTime++;
+    }
+	
+	// We seed our random number here, because it relies on the randomness of
+	// the player pressing start after they've been to the title screen.
+	srand((unsigned)ucTime);
+/*    if(INPUT_GetButton(IN_START) == true)
     {
         eRequestedState = GAME_PLAYLEVEL;
-    }
+    }*
 }
 
 static void ProcessCutscene(void)
