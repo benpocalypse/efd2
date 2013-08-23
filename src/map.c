@@ -247,10 +247,11 @@ void MAP_GenerateMap(unsigned char ucRoomType)
             AddDoor(DOWN, false);
         }
     }
-
-
+    
+    // FIXME - Change below to use map tiles, not "objects."
+    //         I'll do this after I add enemies I believe.
     // Now pepper our room with 'stuff.'
-    AddObstacles(MAX_OBSTACLES-1);
+    //AddObstacles(MAX_OBSTACLES);
 }
 
 
@@ -660,7 +661,9 @@ void AddObstacles(unsigned char ucNumber)
     }
 
     // Now, populate a new set of random obstacles, up to the number requested.
-    if(ucNumber < MAX_OBSTACLES)
+    // FIXME - Right now, obstacles can block a narrow path, ensure space on the
+    //         sides exists.
+    if(ucNumber <= MAX_OBSTACLES)
     {
         for(unsigned char i = 0; i < ucNumber; i++)
         {
@@ -712,3 +715,4 @@ void AddItems(unsigned char ucNumber)
         }
     }
 }
+
