@@ -191,10 +191,10 @@ static void ProcessTitlescreen(void)
 	// We seed our random number here, because it relies on the randomness of
 	// the player pressing start after they've been to the title screen.
 	srand((unsigned)ucTime);
-/*    if(INPUT_GetButton(IN_START) == true)
+    if(INPUT_GetButton(IN_START) == true)
     {
         eRequestedState = GAME_PLAYLEVEL;
-    }*
+    }
 }
 
 static void ProcessCutscene(void)
