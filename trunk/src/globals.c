@@ -77,16 +77,21 @@ COORDINATE GLB_MoveCoordinate(COORDINATE coord, signed char scX, signed char scY
 ///****************************************************************************
 unsigned char GLB_CoordinateToObjectCollision(COORDINATE coord, MapObject mapobj)
 {
+    // First, we check to see if our coordinate and map object are close enough to 
+    // merrit check the individual pixels of the coordinate and object.
     if((coord.ucBigX <= (mapobj.ucX+1)) && (coord.ucBigX >= (mapobj.ucX-1)) &&
        (coord.ucBigY <= (mapobj.ucY+1)) && (coord.ucBigY >= (mapobj.ucY-1)))
     {
+        // Now, generate actual X and Y coordinates before checking them.
         unsigned int uiTX = (coord.ucBigX * 8) + coord.scSmallX + 4;
         unsigned int uiTY = (coord.ucBigY * 8) + coord.scSmallY + 4;
         unsigned int uiDX = (mapobj.ucX * 8) + 4;
         unsigned int uiDY = (mapobj.ucY * 8) + 4;
         
-        if((uiTX >= (uiDX - 9)) && (uiTX <= (uiDX + 9)) && 
-           (uiTY >= (uiDY - 9)) && (uiTY <= (uiDY + 9)))
+        // If the coordinate and the object are within 9-ish pixels, they're
+        // colliding.
+        if(((uiTX + 9) >= uiDX) && (uiTX <= (uiDX + 9)) && 
+           ((uiTY + 9) >= uiDY) && (uiTY <= (uiDY + 9)))
         {
             return true;
         }

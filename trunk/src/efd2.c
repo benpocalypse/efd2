@@ -44,25 +44,10 @@ int main()
 	//SetMasterVolume(0x40);
 	//StartSong(song_nsmb);
 	
-	unsigned char ucTime = 0;
-	
 	ClearVram();
 	
 	GAME_Init();
-/*
-    GAME_DrawTitleScreen();
-    while(INPUT_GetButton(IN_START) != true)
-    {
-        ucTime++;
-    }
-	
-	// We seed our random number here, because it relies on the randomness of
-	// the player pressing start after they've been to the title screen.
-	srand((unsigned)ucTime);
-	
-	GAME_DrawBlankScreen();
-	GAME_DrawHud();
-*/	
+
 	while(1)
 	{	    
 		WaitVsync(1);
