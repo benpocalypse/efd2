@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "logicmanager.h"
 #include "player.h"
+#include "enemy.h"
 #include "input.h"
 #include "map.h"
 #include <stdlib.h>
@@ -174,6 +175,7 @@ static void ProcessInit(void)
     SetSpritesTileTable(efd2_sprites);
     SetSpriteVisibility(true);
     PLY_Init();
+    NME_Init();
     LGC_Init();
     LGC_Start();
     eRequestedState = GAME_TITLESCREEN;

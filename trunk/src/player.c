@@ -19,7 +19,7 @@ static PLAYER objPlayer;
 /// Simply initializes all of our Player related variables to a sane default
 /// state. This is the same as performing a reset.
 ///****************************************************************************
-unsigned char PLY_Init(void)
+void PLY_Init(void)
 {
     objPlayer.ucHealth = 3U;
     objPlayer.ucTotalHealth = 3U;

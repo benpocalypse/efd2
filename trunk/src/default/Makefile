@@ -47,7 +47,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 
 ## Objects that must be built in order to link
 OBJECTS = uzeboxVideoEngineCore.o  uzeboxCore.o uzeboxSoundEngine.o uzeboxSoundEngineCore.o uzeboxVideoEngine.o 
-OBJECTS += globals.o gamemanager.o logicmanager.o player.o map.o input.o $(GAME).o 
+OBJECTS += globals.o gamemanager.o logicmanager.o player.o enemy.o map.o input.o $(GAME).o 
 
 ## Objects explicitly added by the user
 LINKONLYOBJECTS = 
@@ -85,7 +85,10 @@ logicmanager.o: ../logicmanager.c
 
 player.o: ../player.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
-		
+
+enemy.o: ../enemy.c
+	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
+	
 map.o: ../map.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
 	
