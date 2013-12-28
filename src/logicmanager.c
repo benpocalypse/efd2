@@ -3,6 +3,7 @@
 #include "input.h"
 #include "map.h"
 #include "player.h"
+#include "enemy.h"
 
 #include <avr/pgmspace.h>
 #include <uzebox.h>
@@ -19,6 +20,15 @@
 #define PLAYER_RUN4         0U
 #define PLAYER_RUN_FRAMES   4U
 
+// Enemy sprite related defines
+#define ENEMY1_SPRITE       1U
+#define ENEMY1_IDLE         3U
+#define ENEMY1_RUN1         4U
+#define ENEMY1_RUN2         3U
+#define ENEMY1_RUN3         5U
+#define ENEMY1_RUN4         3U
+#define ENEMY_RUN_FRAMES    4U
+
 // This just defines how long we delay on each frame to achieve smooth animation
 #define FRAME_COUNTER       3U
 
@@ -33,6 +43,12 @@
 // These variables are used to animate the player
 static unsigned char ucPlayerRunFrame;
 static unsigned char ucPlayerRun[PLAYER_RUN_FRAMES];
+
+// These variables are used to animate the enemies.
+static unsigned char ucEnemyRunFrame;
+static unsigned char ucEnemyRun[ENEMY_RUN_FRAMES];
+
+// These variables are used to control the Logic Manager class itself.
 static unsigned char bRunning;
 static unsigned char bExitReached;
 
@@ -45,6 +61,7 @@ void ProcessUpdatePlayer(void);
 // Internal helper functions
 static COORDINATE SetPlayerStartLocation(void);
 static void DrawPlayer(void);
+static void DrawEnemies(void);
 
 ///****************************************************************************
 /// Simply initializes all of our Logic related variables to a default state.
@@ -54,22 +71,37 @@ void LGC_Init(void)
     bRunning = false;
     bExitReached = false;
    
+    // Set our Uzebox specific sprite structures to sensible defaults.
     sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
     sprites[PLAYER_SPRITE].x = OFF_SCREEN;
     sprites[PLAYER_SPRITE].y = OFF_SCREEN;
     sprites[PLAYER_SPRITE].flags = 0U;
-    
+
+    sprites[ENEMY1_SPRITE].tileIndex - ENEMY1_IDLE;
+    sprites[ENEMY1_SPRITE].x = OFF_SCREEN;
+    sprites[ENEMY1_SPRITE].y = OFF_SCREEN;    
+    sprites[ENEMY1_SPRITE].flags = 0U;
+
     // Now set up our player animation variables
-    ucPlayerRunFrame = 0U;
+    ucPlayerRunFrame = PLAYER_IDLE;
     ucPlayerRun[0] = PLAYER_RUN1;
     ucPlayerRun[1] = PLAYER_RUN2;
     ucPlayerRun[2] = PLAYER_RUN3;
     ucPlayerRun[3] = PLAYER_RUN4;
 
+    ucEnemyRunFrame = ENEMY1_IDLE;
+    ucEnemyRun[0]   = ENEMY1_RUN1;
+    ucEnemyRun[1]   = ENEMY1_RUN2;
+    ucEnemyRun[2]   = ENEMY1_RUN3;
+    ucEnemyRun[3]   = ENEMY1_RUN4;
+
     // Put our player next to the entry door. This is somewhat of a hack,
     // because the map must first be generated for this to work, and that
     // is outside the responsibility of the logic manager class.
     PLY_SetCoordinate(SetPlayerStartLocation());
+
+    // FIXME - this isn't what we want to do, just for testing purposes
+    NME_SetCoordinate(SetPlayerStartLocation());
 }
 
 
@@ -87,6 +119,7 @@ void LGC_ManageLogic(void)
         ProcessInput();
         ProcessUpdatePlayer();
         DrawPlayer();
+        DrawEnemies();
         ucDelay = 0U;
     }
     
@@ -433,3 +466,55 @@ void DrawPlayer(void)
         }
     }
 }
+
+
+void DrawEnemies(void)
+{
+    // This keeps track of which frame of animation the player sprite
+    // is currently using.
+    static unsigned char ucAnimDelay = 0U;
+
+    // First get our players coordinate within the map (which is going to be 
+    // centered in the middle of the screen.)
+    COORDINATE objTempCoord = NME_GetCoordinate();
+
+    // Then put our player sprite where it is supposed to be, by offsetting it's
+    // position the correct amount.
+    sprites[ENEMY1_SPRITE].x = (((objTempCoord.ucBigX + MAP_X_OFFSET)*TILE_SIZE) + objTempCoord.scSmallX);
+    sprites[ENEMY1_SPRITE].y = (((objTempCoord.ucBigY + MAP_Y_OFFSET)*TILE_SIZE) + objTempCoord.scSmallY);
+    
+    sprites[ENEMY1_SPRITE].tileIndex = ENEMY1_IDLE;    
+
+
+    /*
+    // If we're not moving, set our sprite to the idle state.
+    if(PLY_GetDirection() == NO_DIR)
+    {
+        sprites[PLAYER_SPRITE].tileIndex = PLAYER_IDLE;
+    }
+    else
+    {//...otherwise, we're running, so let's animate.
+        // Here we just try to determine which way to flip the player sprite.
+        if(PLY_GetDirection() == LEFT)
+        {
+            sprites[PLAYER_SPRITE].flags = SPRITE_FLIP_X;
+        }
+
+        if(PLY_GetDirection() == RIGHT)
+        {
+            sprites[PLAYER_SPRITE].flags = 0;
+        }
+
+        // If we're running, we just loop our running animations.
+        // This is just used to ensure we only change animation frames every
+        // 150mS by delaying our animation updates.
+        if((ucAnimDelay++)%(FRAME_COUNTER) == 0)
+        {
+            sprites[PLAYER_SPRITE].tileIndex = ucPlayerRun[(ucPlayerRunFrame++)%(PLAYER_RUN_FRAMES)];        
+        }
+    }
+
+    */
+}
+
+

@@ -5,7 +5,7 @@
 
 // Function prototypes that allow outside classes to get access
 // to the Player classes data.
-unsigned char PLY_Init(void);
+void          PLY_Init(void);
 unsigned char PLY_IsCarrying(unsigned int uiItem);
 unsigned char PLY_GiveGold(unsigned char ucGold);
 unsigned char PLY_GiveHealth(unsigned char ucHealth);
