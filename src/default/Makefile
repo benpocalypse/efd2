@@ -1,5 +1,5 @@
 ###############################################################################
-# Makefile for the project SpriteDemo
+# Makefile for the project Escape from Dungeon 2
 ###############################################################################
 
 ## General Flags
@@ -11,7 +11,7 @@ CC = avr-gcc
 INFO=../gameinfo.properties
 
 ## Kernel settings
-KERNEL_DIR = ../../../../kernel
+KERNEL_DIR = ../../../kernel
 KERNEL_OPTIONS  = -DVIDEO_MODE=3 -DINTRO_LOGO=0 -DSCROLLING=0 -DSOUND_CHANNEL_4_ENABLE=0 
 KERNEL_OPTIONS += -DMAX_SPRITES=14 -DRAM_TILES_COUNT=12 -DSCREEN_TILES_V=28 ##-DFIRST_RENDER_LINE=24 
 KERNEL_OPTIONS += -DVRAM_TILES_V=30 ##-DOVERLAY_LINES=4 

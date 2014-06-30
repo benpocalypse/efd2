@@ -256,6 +256,18 @@ void ProcessInput(void)
             PLY_SetVelocity(--ucVel);
         }
     }
+	
+	// If the player hits attack, then stop them, and update their state.
+	if(INPUT_GetButton(IN_A) == true)
+	{
+		PLY_SetVelocity(0U);
+		PLY_SetDirection(NO_DIR);
+		PLY_SetState(PLAYER_ATTACKING);
+	}
+	else
+	{
+		PLY_SetState(PLAYER_NORMAL);
+	}
 }
 
 
