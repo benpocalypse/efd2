@@ -3,7 +3,7 @@
 // All of the data related to the player is stored  here.
 typedef struct
 {
-    unsigned char ucHealth;
+    unsigned char ucHealthAndState;
     unsigned char ucTotalHealth;
     unsigned char ucGold;
     unsigned int  uiInventory; // BITFIELD...MASKABLE, ORABLE(16 items total)
@@ -21,7 +21,7 @@ static PLAYER objPlayer;
 ///****************************************************************************
 void PLY_Init(void)
 {
-    objPlayer.ucHealth = 3U;
+    objPlayer.ucHealthAndState = 0x30;
     objPlayer.ucTotalHealth = 3U;
     objPlayer.ucGold = 0U;
     objPlayer.uiInventory = 0U;
@@ -53,6 +53,8 @@ unsigned char PLY_GiveGold(unsigned char ucGold)
 
     // FIXME - Add a check here to see if the player has picked up more than X
     //         gold, and if so, increment their total health.
+	
+	return 0;
 }
 
 
@@ -62,14 +64,19 @@ unsigned char PLY_GiveGold(unsigned char ucGold)
 ///****************************************************************************
 unsigned char PLY_GiveHealth(unsigned char ucHealth)
 {
-    if(objPlayer.ucHealth < (objPlayer.ucTotalHealth - ucHealth))
+	/*
+	unsigned char ucTempHealth = (objPlayer.ucHealthAndState & 0xF0) >> 4;
+	
+    if(ucTempHealth < (objPlayer.ucTotalHealth - ucHealth))
     {
-        objPlayer.ucHealth += ucHealth;
+        objPlayer.ucHealthAndState += (ucHealth << 4);
     }
     else
     {
-        objPlayer.ucHealth = objPlayer.ucTotalHealth;
-    }
+        objPlayer.ucHealthAndState = (objPlayer.ucHealthAndState & 0x0F) + (objPlayer.ucTotalHealth << 4);
+    }*/
+	
+	return 0;
 }
 
 ///****************************************************************************
@@ -77,14 +84,19 @@ unsigned char PLY_GiveHealth(unsigned char ucHealth)
 ///****************************************************************************
 unsigned char PLY_TakeHealth(unsigned char ucHealth)
 {
-    if(ucHealth > objPlayer.ucHealth)
+	/*
+	unsigned char ucTempHealth = (objPlayer.ucHealthAndState & 0xF0) >> 4;
+	
+    if(ucHealth > ucTempHealth)
     {
-        objPlayer.ucHealth = 0U;
+        objPlayer.ucHealthAndState = (objPlayer.ucHealthAndState & 0x0F);
     }
     else
     {
-        objPlayer.ucHealth -= ucHealth;
+        objPlayer.ucHealthAndState -= (ucHealth << 4);
     }
+	 */
+	return 0;
 }
 
 ///****************************************************************************
@@ -101,7 +113,7 @@ void PLY_PassedScreen(void)
 ///****************************************************************************
 unsigned char PLY_GetHealth(void)
 {
-    objPlayer.ucHealth;
+    return (objPlayer.ucHealthAndState & 0xF0) >> 4;
 }
 
 ///****************************************************************************
@@ -184,3 +196,18 @@ void PLY_SetCoordinate(COORDINATE objNewCoord)
     objPlayer.objLocation.scSmallY = objNewCoord.scSmallY;
 }
 
+///****************************************************************************
+/// Simple getter for the player's current 'state'.
+///****************************************************************************
+unsigned char PLY_GetState(void)
+{
+	return (objPlayer.ucHealthAndState & 0x0F);
+}
+
+///****************************************************************************
+/// Simple setter for the player's current 'state'.
+///****************************************************************************
+void PLY_SetState(unsigned char ucState)
+{
+	objPlayer.ucHealthAndState = (objPlayer.ucHealthAndState & 0xF0) + ucState;
+}

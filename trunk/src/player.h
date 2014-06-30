@@ -20,5 +20,7 @@ unsigned char PLY_GetDirection(void);
 void          PLY_SetDirection(unsigned char ucDir);
 COORDINATE    PLY_GetCoordinate(void);
 void          PLY_SetCoordinate(COORDINATE objNewCoord);
+unsigned char PLY_GetState(void);
+void          PLY_SetState(unsigned char ucState);
 
 #endif

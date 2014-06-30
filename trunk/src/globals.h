@@ -12,6 +12,11 @@
 #define GOLD                    4U
 #define BOMB                    5U
 
+// Player states that they can be in.
+#define PLAYER_NORMAL			0U
+#define PLAYER_ATTACKING		1U
+#define PLAYER_HIT				2U
+#define PLAYER_DEAD				3U
 
 // Plyaer inventory related defines, a max of 16 in game items.
 #define CLOTH_ARMOR       0x0001
