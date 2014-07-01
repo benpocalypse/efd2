@@ -12,7 +12,7 @@
 #define GOLD                    4U
 #define BOMB                    5U
 
-// Player states that they can be in.
+// Player states that they can be in. These might need to be in logicmanager.c though...
 #define PLAYER_NORMAL			0U
 #define PLAYER_ATTACKING		1U
 #define PLAYER_HIT				2U
