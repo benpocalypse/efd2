@@ -29,7 +29,7 @@
 #define ENEMY1_RUN4         3U
 #define ENEMY_RUN_FRAMES    4U
 
-// This just defines how long we delay on each frame to achieve smooth animation
+// This just defines how long we delay on each frame to achieve "smooth" animation
 #define FRAME_COUNTER       3U
 
 // This defines a delay counter to prevent the Logic Manager from processing 
@@ -38,6 +38,7 @@
 
 // Logic related defines
 #define MAX_PLAYER_VELOCITY 3U
+#define LOGIC_PLAYER_DELAY  3U
 
 
 // These variables are used to animate the player
@@ -56,6 +57,7 @@ static unsigned char bExitReached;
 // Private class functions
 void ProcessInput(void);
 void ProcessUpdatePlayer(void);
+void ProcessPlayerState(void);
 
 
 // Internal helper functions
@@ -108,7 +110,8 @@ void LGC_Init(void)
 ///****************************************************************************
 /// This function handles, sequentially, all of the things the logic manager
 /// class is tasked with handling. This includes checking input during gameply,
-/// doing player collision detection, and drawing the player.
+/// managing player state, doing player collision detection, and drawing 
+/// the player.
 ///****************************************************************************
 void LGC_ManageLogic(void)
 {   
@@ -117,6 +120,7 @@ void LGC_ManageLogic(void)
     if((ucDelay == LOGIC_DELAY) && (bRunning == true))
     {
         ProcessInput();
+		ProcessPlayerState();
         ProcessUpdatePlayer();
         DrawPlayer();
         DrawEnemies();
@@ -168,6 +172,18 @@ void ProcessInput(void)
     //         slowly. We need to handle this by just keeping them going in the
     //         same direction they were, without allowing them to travel in a
     //         diagonal direction.
+	
+	
+	// If the player hits attack, then stop them, and update their state.
+	// Also, destructively break out of this function so we don't let the player
+	// move during an attack. We'll see if this is a good idea or not.
+	if((INPUT_GetButton(IN_A) == true) || (PLY_GetState() == PLAYER_ATTACKING))
+	{
+		PLY_SetVelocity(0U);
+		PLY_SetDirection(NO_DIR);
+		PLY_SetState(PLAYER_ATTACKING);
+		return;
+	}
 
     // If the player presses up...
     if(INPUT_GetButton(IN_UP) == true)
@@ -255,18 +271,31 @@ void ProcessInput(void)
         {
             PLY_SetVelocity(--ucVel);
         }
-    }
+    }		
+}
+
+///****************************************************************************
+/// This handles the state of the player, and decides what actions can be
+/// performed based on that.
+///****************************************************************************
+void ProcessPlayerState(void)
+{
+	static unsigned char ucDelay = 0U;
 	
-	// If the player hits attack, then stop them, and update their state.
-	if(INPUT_GetButton(IN_A) == true)
+	switch(PLY_GetState())
 	{
-		PLY_SetVelocity(0U);
-		PLY_SetDirection(NO_DIR);
-		PLY_SetState(PLAYER_ATTACKING);
-	}
-	else
-	{
-		PLY_SetState(PLAYER_NORMAL);
+		case PLAYER_NORMAL:
+			if(ucDelay++ >=  LOGIC_PLAYER_DELAY)
+			{
+				PLY_SetState(PLAYER_NORMAL);
+			}
+			break;
+			
+		case PLAYER_ATTACKING:
+			break;
+			
+		default:
+			break;
 	}
 }
 
