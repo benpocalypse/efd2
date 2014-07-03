@@ -30,7 +30,7 @@
 #define ENEMY_RUN_FRAMES    4U
 
 // This just defines how long we delay on each frame to achieve "smooth" animation
-#define FRAME_COUNTER       3U
+#define FRAME_COUNTER       2U
 
 // This defines a delay counter to prevent the Logic Manager from processing 
 // too quickly, and having everything run too fast.
